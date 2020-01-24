@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Secrets as a Service</title>
@@ -17,7 +17,7 @@
       <pubDate>Wed, 25 Sep 2019 21:16:19 +0200</pubDate>
       
       <guid>https://secrets-as-a-service.com/about/</guid>
-      <description> Balthasar Biedermann Intersection of IT-Security, Software-Engineering and DevOps   </description>
+      <description> Balthasar Biedermann Intersection of IT Security, Software Engineering and DevOps  </description>
     </item>
     
     <item>
@@ -27,7 +27,9 @@
       
       <guid>https://secrets-as-a-service.com/impressum/</guid>
       <description>Impressum Angaben gemäß § 5 TMG
-Balthasar Biedermann Am Krottbach 10 76646 Bruchsal
+Balthasar Biedermann
+Am Krottbach 10
+76646 Bruchsal
 Vertreten durch Balthasar Biedermann
 Kontakt E-Mail: info@secrets-as-a-service.com
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV Balthasar Biedermann Am Krottbach 10 76646 Bruchsal

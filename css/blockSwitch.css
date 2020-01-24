@@ -1,0 +1,45 @@
+.hidden {
+	display: none;
+}
+
+.switch {
+	border-width: 1px 1px 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+	display: inline-block;
+}
+
+.switch--item {
+	padding: 10px;
+	background-color: #ffffff;
+	color: #7a2518;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.switch--item:not(:first-child) {
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+}
+
+.switch--item.selected {
+	background-color: #7a2519;
+	color: #ffffff;
+}
+
+div .switch {
+	margin-left:8px;
+	border-color:#406a2a;
+	border-radius:4px 4px 0 0
+}
+div .switch--item {
+	color:#406a2a;
+	background-color:transparent
+}
+div .switch--item.selected {
+	background-color:#406a2a
+}
+div .switch--item:not(:first-child) {
+	border-color:#406a2a
+}
