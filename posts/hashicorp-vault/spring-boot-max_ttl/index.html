@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Balthasar Biedermann">
+    <meta name="description" content="Intersection of IT Security, Software Engineering and DevOps">
+    <meta name="keywords" content="blog,developer,personal,security,devops,software,hashicorp,vault,spring">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Hashicorp Vault max_ttl killed my Spring app"/>
+<meta name="twitter:description" content="TL;DR Spring Cloud Vault does not renew your dynamic database secret which leaves the application in a broken state when these credentials expire.
+ There are following options:
+  Use a long enough max_ttl and redeploy/restart the application often enough
+  If needed, increase the Vault system max time-to-live
+  Restart the Spring Boot application when the database secret expires
+  Implement database connection renewal, if possible (will be described in a follow-up post)"/>
+
+    <meta property="og:title" content="Hashicorp Vault max_ttl killed my Spring app" />
+<meta property="og:description" content="TL;DR Spring Cloud Vault does not renew your dynamic database secret which leaves the application in a broken state when these credentials expire.
+ There are following options:
+  Use a long enough max_ttl and redeploy/restart the application often enough
+  If needed, increase the Vault system max time-to-live
+  Restart the Spring Boot application when the database secret expires
+  Implement database connection renewal, if possible (will be described in a follow-up post)" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/" />
+<meta property="article:published_time" content="2020-01-28T20:51:34+01:00" />
+<meta property="article:modified_time" content="2020-01-28T20:51:34+01:00" />
+
+
+    
+      <base href="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/">
+    
+    <title>
+  Hashicorp Vault max_ttl killed my Spring app · Secrets as a Service
+</title>
+
+    
+      <link rel="canonical" href="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.9ad9796187a37d151c38602b94ec1ccd7349738f7f58af72680391e4428cb30a.css" integrity="sha256-mtl5YYejfRUcOGArlOwczXNJc49/WK9yaAOR5EKMswo=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="/css/blockSwitch.css" />
+    
+
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+    
+      <script src="/js/blockSwitch.js"></script>
+    
+
+    
+
+    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.63.1" />
+  </head>
+
+  
+  
+  <body class="colorscheme-light">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Secrets as a Service
+    </a>
+    
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://secrets-as-a-service.com/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Hashicorp Vault max_ttl killed my Spring app</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2020-01-28T20:51:34&#43;01:00'>
+                Jan 28, 2020
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        <div class="sect1">
+<h2 id="_tldr">TL;DR</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud Vault does not renew your dynamic database secret which leaves the application in a broken state when
+these credentials expire.</p>
+</div>
+<div class="paragraph">
+<p>There are following options:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#_use_a_long_enough_max_ttl_for_the_dynamic_database_credential">Use a long enough <code>max_ttl</code> and
+redeploy/restart the application often enough</a></p>
+</li>
+<li>
+<p><a href="#_when_the_vault_system_maximum_ttl_is_not_enough">If needed, increase the Vault system max time-to-live</a></p>
+</li>
+<li>
+<p><a href="#_restarting_the_application_when_credentials_expire">Restart the Spring Boot application when the database
+secret expires</a></p>
+</li>
+<li>
+<p>Implement database connection renewal, if possible (will be described in a follow-up post)</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_disclaimer_about_kotlin_in_code_examples">Disclaimer about Kotlin in code examples</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m using Kotlin instead of Java for the Spring code examples. The main reason is that I like Kotlin much more because it
+allows me to write really good readable and concise code (just to pick two out of many reasons) with imho
+nearly no disadvantages. Also, in the context of Spring Kotlin works perfectly fine. For myself I try to use a
+Kotlin-first approach whenever possible, so I&#8217;ll also do this with my code examples.</p>
+</div>
+<div class="paragraph">
+<p>My goal is to use readable and idiomatic Kotlin code and I expect the examples should still be understandable also for
+Java developers. And if you get the idea of the solution, adapting it to Java is just a small step.</p>
+</div>
+<div class="paragraph">
+<p>Obviously, most people still use Java and having examples in your native language is always more convenient and allows
+copy-and-pasting some snippets directly. That&#8217;s why all code examples will also be available in Java in a future update
+of this post.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_challenges_with_hashicorp_vault_and_secrets_management">Challenges with Hashicorp Vault and Secrets Management</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you have a Spring Boot application or microservice sooner or later (better sooner) you have to think about how to
+handle the secrets in your code in a secure manner. Fortunately, these days there are already really good
+<a href="https://www.thoughtworks.com/radar/techniques/secrets-as-a-service">secrets as a service</a> tools available. The most
+famous and mature one is <a href="https://www.vaultproject.io/">Hashicorp Vault</a>. As a Kotlin or Java developer building a Spring
+Boot application you are in a lucky situation, because Hashicorp Vault it is really easy to get your Vault integration
+up and running by usinghttps://spring.io/projects/spring-vault[Spring Vault]. Vault&#8217;s concept of
+<a href="https://www.hashicorp.com/blog/why-we-need-dynamic-secrets/">dynamic secrets</a> is probably THE killer feature and allows
+you for example to easily get unique, secure and short-lived database credentials with just the privileges your
+application needs to work.</p>
+</div>
+<div class="paragraph">
+<p>There are quite good examples how to get started with Spring, Vault and e.g.
+<a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets">postgres</a>,
+<a href="https://www.vaultproject.io/docs/secrets/databases/mysql-maria/">MySQL</a>,
+<a href="https://www.vaultproject.io/docs/secrets/databases/mongodb/">MongoDB</a> and
+<a href="https://www.vaultproject.io/docs/secrets/databases/">many other databases</a>.
+These examples work with surprisingly little effort. But as usually the
+<a href="https://en.wikipedia.org/wiki/Pareto_principle">Pareto principle</a> also applies here. There a quite some challenges. For
+instance, <a href="https://www.vaultproject.io/docs/concepts/dev-server/">setting up Vault in dev mode</a>, like it is done in most
+examples, is easy and fast but you should never do that in production. And this is just the most obvious operational
+task to tackle. Here is a (not complete) list contains of things to consider:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>securing Vault access with
+<a href="https://www.vaultproject.io/docs/configuration/listener/tcp/#inlinecode-tls_cert_file-4">https/TLS</a></p>
+</li>
+<li>
+<p>setting up a certificate authority (CA) for your https connection (
+<a href="https://www.vaultproject.io/docs/secrets/pki/index.html">Vault itself could support here</a>, but you have to solve the
+bootstrapping problem)</p>
+</li>
+<li>
+<p>ensure that Vault&#8217;s availability is good enough to not break your system: probably you want to have a
+<a href="https://www.vaultproject.io/docs/concepts/ha/">high availability (HA) setup</a></p>
+</li>
+<li>
+<p>bootstrap Vault in a secure but still maintainable way which fits your needs(aka
+<a href="https://www.vaultproject.io/docs/concepts/seal/">unsealing</a>)</p>
+</li>
+<li>
+<p>who and how is the data in vault configured and maintained</p>
+</li>
+<li>
+<p>which Vault authentication method to use and how to bring the needed data to your applications (also here, Vault has
+different supporting tools like <a href="https://www.vaultproject.io/docs/concepts/response-wrapping/">token wrapping</a>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are a lot of operational things you should think about but in this blog post I want to focus on an
+application-level challenge with using Vault together with Spring: What happens when the database secret reaches its
+<a href="https://www.vaultproject.io/docs/concepts/lease/">maximum time-to-live (TTL)</a>?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spring_boot_and_the_maximum_ttl_of_a_lease_in_hashicorp_vault">Spring Boot and the maximum TTL of a lease in Hashicorp Vault</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most people don&#8217;t think about the maximum time-to-life of this secret or expect that the database credentials are
+automatically rotated by Spring when needed. Let&#8217;s check the
+<a href="https://cloud.spring.io/spring-cloud-vault/reference/html/#vault.config.backends.database">Spring Cloud Vault
+documentation</a>:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Spring Cloud Vault does not support getting new credentials and configuring your <code>DataSource</code> with them when the
+maximum lease time has been reached. That is, if <code>max_ttl</code> of the Database role in Vault is set to <code>24h</code> that means
+that 24 hours after your application has started it can no longer authenticate with the database.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>This is really unfortunate, because it will leave the Spring application in a broken state where no database
+communication is possible anymore. So, what can you do about this?</p>
+</div>
+<div class="paragraph">
+<p>I can offer you 4 solutions. The first 3 are more generically applicable with some prerequisites to apply. The 4th
+solution is only working for a more specific but also not too uncommon setup and provides a smoother experience. I will
+describe it&#8217;s details in a follow-up blog post.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s check our options.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_a_long_enough_max_ttl_for_the_dynamic_database_credential">Use a long enough <code>max_ttl</code> for the dynamic database credential</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Spring Cloud Vault documentation talks about the <code>max_ttl</code> of the database role in Vault, which is the maximum lease
+time. This duration is configurable. So, if you regularly deploy or restart your application, you can just use a long
+enough <code>max_ttl</code>.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s consider you have a two-week sprint and it is guaranteed that after each sprint your application is redeployed.
+Then you could just configure the <code>max_ttl</code> to be longer than 2 weeks, for instance 16 days. A good example how to
+setup Vault to generate dynamic credentials for PostgreSQL can be found on the
+<a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets">Hashicorp Learn site about Dynamic Secrets</a>.
+You just have to adapt the <code>max_ttl</code> value to 16 days (384 hours)
+<a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets#cli-command-2">when creating the database role</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">vault write database/roles/readonly db_name=postgresql \
+        creation_statements=@readonly.sql \
+        default_ttl=1h max_ttl=384h</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But you cannot increase the maximum time-to-live for the secret infinitely. Hashicorp Vault has a system-wide max:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The system max TTL, which is 32 days but can be changed in Vault&#8217;s configuration file.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; <a href="https://www.vaultproject.io/docs/concepts/tokens/#the-general-case">Vault Concepts: Tokens</a>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_when_the_vault_system_maximum_ttl_is_not_enough">When the Vault system maximum TTL is not enough&#8230;&#8203;</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>&#8230;&#8203;it is also possible to increase it via the Vault configuration. The
+<a href="https://www.vaultproject.io/docs/configuration/#inlinecode-max_lease_ttl-8">Vault Configuration documentation</a> mentions
+that the <code>max_lease_ttl</code> parameter, which defaults to <code>"768h"</code> can be used for that.</p>
+</div>
+<div class="paragraph">
+<p>An example vault config could look like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-hcl" data-lang="hcl">max_lease_ttl = "3000h" # <b class="conum">(1)</b>
+
+storage "file" {
+  path = "/var/vault/vault-storage"
+}
+
+listener "tcp" {
+  address     = "127.0.0.1:8200"
+  tls_disable = 1 # <b class="conum">(2)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The system max TTL is set to 3000h here, the rest of the config is just for demonstration purpose</p>
+</li>
+<li>
+<p>You should never do that in production</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Before you now just change the <code>max_lease_ttl</code> for all your Vault instances to a really big value, you should wait a
+minute. Hashicorp of course has a good reason to limit the maximum TTL and to not use a too big value by default:
+<strong>The longer a <em>dynamic</em> secret lives, the less dynamic it is in the end</strong>. So if you choose a too big time-to-live
+value, the risk of having really long living secrets and with that the risk of
+<a href="https://www.hashicorp.com/resources/what-is-secret-sprawl-why-is-it-harmful">secret sprawl</a> is increasing. That is the
+reason why I would not recommend changing this value if you can use one of the other options.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_restarting_the_application_when_credentials_expire">Restarting the application when credentials expire</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you cannot guaranty that your Spring application is redeployed or restarted often enough or you don&#8217;t want to live
+with the risk of long living secrets the first two options are not for you. Instead you should change the setup, so
+that the database secrets of the application can be rotated.</p>
+</div>
+<div class="paragraph">
+<p>The easiest way to do that is to ensure that the application is restarted when the secret expires. Depending on your
+setup you already have a process manager like systemd or a container-orchestration system like Kubernetes which ensures, that your
+application is always running. Whenever the application stops this tool will start a new instance for you.</p>
+</div>
+<div class="paragraph">
+<p>So how can the Spring application detect the secret is expired and cannot be renewed anymore? This can be done by
+adding an additional
+<code><a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/event/LeaseListener.html">LeaseListenener</a></code> to the
+<code><a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/SecretLeaseContainer.html">SecretLeaseContainer</a></code>.</p>
+</div>
+<div class="paragraph">
+<p>I expect that you&#8217;ve already setup Spring and Vault to create dynamic database secrets (how to do that, see for example
+<a href="https://spring.io/blog/2016/08/15/managing-your-database-secrets-with-vault">Managing your Database Secrets with Vault @
+Spring blog</a> or <a href="https://www.baeldung.com/spring-cloud-vault">An Intro to Spring Cloud Vault @ Baeldung</a>). Then you can
+autowire the <code>SecretLeaseContainer</code>, the database role which is configured as the property
+<code>spring.cloud.vault.database.role</code> and the <code>ConfigurableApplicationContext</code> to allow closing the ApplicationContext
+which eventually shuts down the Spring application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">@Configuration
+class VaultConfig(
+        private val leaseContainer: SecretLeaseContainer,
+        @Value("\${spring.cloud.vault.database.role}")
+        private val databaseRole: String,
+        private val applicationContext: ConfigurableApplicationContext
+) {</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In a <code>@PostConstruct</code> method you can then add the additional <code>LeaseListenener</code> which does the shutdown:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">@PostConstruct
+private fun configureShutdownWhenLeaseExpires() {
+    val vaultCredsPath = "database/creds/$databaseRole" // <b class="conum">(1)</b>
+    leaseContainer.addLeaseListener { event -&gt; // <b class="conum">(2)</b>
+        if (event.path == vaultCredsPath) { // <b class="conum">(3)</b>
+            log.info { "Lease change for DB: ($event) : (${event.lease})" }
+            if (event.isLeaseExpired &amp;&amp; event.mode == RENEW) { // <b class="conum">(3)</b>
+                log.error { "Database lease expired. Shutting down." }
+                applicationContext.close() // <b class="conum">(4)</b>
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>build the creds path by using the autowired <code>databaseRole</code></p>
+</li>
+<li>
+<p><code>LeaseListenener</code> is a SAM interface, so just provide a lambda (see
+<a href="https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions">Kotlin&#8217;s SAM Conversion</a>)</p>
+</li>
+<li>
+<p><code>event.path</code>, <code>event.isLeaseExpired</code> and <code>event.mode</code> are extension methods (see next code snippet)</p>
+</li>
+<li>
+<p>shutdown the Spring application</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And here are the extension methods used above:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">private val SecretLeaseEvent.path get() = source.path
+private val SecretLeaseEvent.isLeaseExpired get() = this is SecretLeaseExpiredEvent
+private val SecretLeaseEvent.mode get() = source.mode</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t use a tool like Kubernetes or systemd you should
+<a href="https://www.baeldung.com/java-restart-spring-boot-app">restart the application</a>, instead of shutting it down.</p>
+</div>
+<div class="paragraph">
+<p>The complete shutdown example can be found as a
+<a href="https://github.com/usr42/vault-spring-database-secret-expired-shutdown">github repository</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_next_steps">Next steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is also the possibility to implement the database credential renewal in the application itself. Spring itself
+does not provide a generic way to do this. That&#8217;s why I want to show a way how to do this manually if you use Spring
+with HikariCP as JDBC connection pool. This for example works for postgres or MySQL databases.</p>
+</div>
+</div>
+</div>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <a href="/impressum">Impressum</a>
+    
+    
+    
+    
+    <a href="https://github.com/usr42" aria-label="Github" >
+      <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+    </a>
+    
+    
+    
+    <a href="https://www.linkedin.com/in/balthasar-biedermann-742170107/" aria-label="LinkedIn" >
+      <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+    </a>
+    
+    
+    
+    
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

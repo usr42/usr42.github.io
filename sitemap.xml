@@ -3,12 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://secrets-as-a-service.com/about/</loc>
-    <lastmod>2019-09-25T21:16:19+02:00</lastmod>
+    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</loc>
+    <lastmod>2020-01-28T20:51:34+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://secrets-as-a-service.com/</loc>
+    <lastmod>2020-01-28T20:51:34+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/</loc>
+    <lastmod>2020-01-28T20:51:34+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://secrets-as-a-service.com/about/</loc>
     <lastmod>2019-09-25T21:16:19+02:00</lastmod>
   </url>
   
@@ -23,10 +33,6 @@
   
   <url>
     <loc>https://secrets-as-a-service.com/posts/</loc>
-  </url>
-  
-  <url>
-    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/</loc>
   </url>
   
   <url>
