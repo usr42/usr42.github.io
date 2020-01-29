@@ -289,9 +289,9 @@ You just have to adapt the <code>max_ttl</code> value to 16 days (384 hours)
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">vault write database/roles/readonly db_name=postgresql \
-        creation_statements=@readonly.sql \
-        default_ttl=1h max_ttl=384h</code></pre>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="bash">vault write database/roles/readonly <span style="color: #93a1a1;background-color: #002b36">db_name</span><span style="color: #93a1a1">=</span>postgresql <span style="color: #d33682">\</span>
+        <span style="color: #93a1a1;background-color: #002b36">creation_statements</span><span style="color: #93a1a1">=</span>@readonly.sql <span style="color: #d33682">\</span>
+        <span style="color: #93a1a1;background-color: #002b36">default_ttl</span><span style="color: #93a1a1">=</span>1h <span style="color: #93a1a1;background-color: #002b36">max_ttl</span><span style="color: #93a1a1">=</span>384h</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -322,27 +322,29 @@ that the <code>max_lease_ttl</code> parameter, which defaults to <code>"768h"</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-hcl" data-lang="hcl">max_lease_ttl = "3000h" # <b class="conum">(1)</b>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="hcl"><span style="color: #93a1a1;background-color: #002b36">max_lease_ttl</span> <span style="color: #002b36;background-color: #dc322f">=</span> <span style="color: #859900">"3000h"</span> <i class="conum" data-value="1"></i><b>(1)</b>
 
-storage "file" {
-  path = "/var/vault/vault-storage"
-}
+<span style="color: #93a1a1;background-color: #002b36">storage</span> <span style="color: #859900">"file"</span> <span style="color: #93a1a1">{</span>
+  <span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">"/var/vault/vault-storage"</span>
+<span style="color: #93a1a1">}</span>
 
-listener "tcp" {
-  address     = "127.0.0.1:8200"
-  tls_disable = 1 # <b class="conum">(2)</b>
-}</code></pre>
+<span style="color: #93a1a1;background-color: #002b36">listener</span> <span style="color: #859900">"tcp"</span> <span style="color: #93a1a1">{</span>
+  <span style="color: #93a1a1;background-color: #002b36">address</span>     <span style="color: #93a1a1">=</span> <span style="color: #859900">"127.0.0.1:8200"</span>
+  <span style="color: #93a1a1;background-color: #002b36">tls_disable</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">1</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span style="color: #93a1a1">}</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<ol>
-<li>
-<p>The system max TTL is set to 3000h here, the rest of the config is just for demonstration purpose</p>
-</li>
-<li>
-<p>You should never do that in production</p>
-</li>
-</ol>
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The system max TTL is set to 3000h here, the rest of the config is just for demonstration purpose</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You should never do that in production</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Before you now just change the <code>max_lease_ttl</code> for all your Vault instances to a really big value, you should wait a
@@ -383,13 +385,13 @@ which eventually shuts down the Spring application:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">@Configuration
-class VaultConfig(
-        private val leaseContainer: SecretLeaseContainer,
-        @Value("\${spring.cloud.vault.database.role}")
-        private val databaseRole: String,
-        private val applicationContext: ConfigurableApplicationContext
-) {</code></pre>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@Configuration</span>
+<span style="color: #cb4b16">class</span> <span style="color: #b58900">VaultConfig</span><span style="color: #93a1a1">(</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">SecretLeaseContainer</span><span style="color: #93a1a1">,</span>
+        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">"\${spring.cloud.vault.database.role}"</span><span style="color: #93a1a1">)</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">databaseRole</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">,</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">ConfigurableApplicationContext</span>
+<span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -397,46 +399,50 @@ class VaultConfig(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">@PostConstruct
-private fun configureShutdownWhenLeaseExpires() {
-    val vaultCredsPath = "database/creds/$databaseRole" // <b class="conum">(1)</b>
-    leaseContainer.addLeaseListener { event -&gt; // <b class="conum">(2)</b>
-        if (event.path == vaultCredsPath) { // <b class="conum">(3)</b>
-            log.info { "Lease change for DB: ($event) : (${event.lease})" }
-            if (event.isLeaseExpired &amp;&amp; event.mode == RENEW) { // <b class="conum">(3)</b>
-                log.error { "Database lease expired. Shutting down." }
-                applicationContext.close() // <b class="conum">(4)</b>
-            }
-        }
-    }
-}</code></pre>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@PostConstruct</span>
+<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">configureShutdownWhenLeaseExpires</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">"database/creds/$databaseRole"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">addLeaseListener</span> <span style="color: #93a1a1">{</span> <span style="color: #93a1a1;background-color: #002b36">event</span> <span style="color: #93a1a1">-&gt;</span> <i class="conum" data-value="2"></i><b>(2)</b>
+        <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">==</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
+            <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Lease change for DB: ($event) : (${event.lease})"</span> <span style="color: #93a1a1">}</span>
+            <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">RENEW</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
+                <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Database lease expired. Shutting down."</span> <span style="color: #93a1a1">}</span>
+                <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">close</span><span style="color: #93a1a1">()</span> <i class="conum" data-value="4"></i><b>(4)</b>
+            <span style="color: #93a1a1">}</span>
+        <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1">}</span>
+<span style="color: #93a1a1">}</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
-<ol>
-<li>
-<p>build the creds path by using the autowired <code>databaseRole</code></p>
-</li>
-<li>
-<p><code>LeaseListenener</code> is a SAM interface, so just provide a lambda (see
-<a href="https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions">Kotlin&#8217;s SAM Conversion</a>)</p>
-</li>
-<li>
-<p><code>event.path</code>, <code>event.isLeaseExpired</code> and <code>event.mode</code> are extension methods (see next code snippet)</p>
-</li>
-<li>
-<p>shutdown the Spring application</p>
-</li>
-</ol>
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>build the creds path by using the autowired <code>databaseRole</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>LeaseListenener</code> is a SAM interface, so just provide a lambda (see
+<a href="https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions">Kotlin&#8217;s SAM Conversion</a>)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>event.path</code>, <code>event.isLeaseExpired</code> and <code>event.mode</code> are extension methods (see next code snippet)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>shutdown the Spring application</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>And here are the extension methods used above:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-kotlin" data-lang="kotlin">private val SecretLeaseEvent.path get() = source.path
-private val SecretLeaseEvent.isLeaseExpired get() = this is SecretLeaseExpiredEvent
-private val SecretLeaseEvent.mode get() = source.mode</code></pre>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">source</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">path</span>
+<span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">=</span> <span style="color: #6c71c4">this</span> <span style="color: #6c71c4">is</span> <span style="color: #b58900">SecretLeaseExpiredEvent</span>
+<span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">source</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
