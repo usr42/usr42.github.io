@@ -39,7 +39,7 @@
     
       
       
-      <link rel="stylesheet" href="/css/coder.min.9ad9796187a37d151c38602b94ec1ccd7349738f7f58af72680391e4428cb30a.css" integrity="sha256-mtl5YYejfRUcOGArlOwczXNJc49/WK9yaAOR5EKMswo=" crossorigin="anonymous" media="screen" />
+      <link rel="stylesheet" href="/css/coder.min.b02887ac86e994225e7da8caadae26afa5dddf196ceada0d155625756ca339e5.css" integrity="sha256-sCiHrIbplCJefajKra4mr6Xd3xls6toNFVYldWyjOeU=" crossorigin="anonymous" media="screen" />
     
 
     
@@ -121,6 +121,12 @@
         <div class="sect1">
 <h2 id="_tldr">TL;DR</h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/locked-door.jpg" alt="Locked Door">
+</div>
+<div class="title">Image by <a href="https://pixabay.com/users/Broesis-5213623/">Maike und Björn Bröskamp</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
 <div class="paragraph">
 <p>Spring Cloud Vault does not renew your dynamic database secret which leaves the application in a broken state when
 these credentials expire.</p>
@@ -164,6 +170,12 @@ of this post.</p>
 <div class="sect1">
 <h2 id="_challenges_with_hashicorp_vault_and_secrets_management">Challenges with Hashicorp Vault and Secrets Management</h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/wispering-mongoose.jpg" alt="Mongooses cannot keep secrets">
+</div>
+<div class="title">Mongooses cannot keep secrets - Image by <a href="https://pixabay.com/users/veverkolog-11252911/">Dušan Smetana</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
 <div class="paragraph">
 <p>If you have a Spring Boot application or microservice, sooner or later (better sooner) you have to think about how to
 handle the secrets in your code in a secure manner. Fortunately, these days there are already really good
@@ -294,6 +306,12 @@ You just have to adapt the <code>max_ttl</code> value to 16 days (384 hours)
 <div class="sect1">
 <h2 id="_when_the_vault_system_maximum_ttl_is_not_enough">When the Vault system maximum TTL is not enough&#8230;&#8203;</h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/clock-1274699_1920.jpg" alt="Time is running out">
+</div>
+<div class="title">Time is running out - Image by <a href="https://pixabay.com/users/Monoar-2240009/">Monoar Rahman Rony</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
 <div class="paragraph">
 <p>&#8230;&#8203;it is also possible to increase it via the Vault configuration. The
 <a href="https://www.vaultproject.io/docs/configuration/#inlinecode-max_lease_ttl-8">Vault Configuration documentation</a> mentions
@@ -440,6 +458,12 @@ which eventually shuts down the Spring application:</p>
 <div class="sect1">
 <h2 id="_next_steps">Next steps</h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/climbing-2264698_1920.jpg" alt="Cliffhanger &#8230;&#8203; to be continued">
+</div>
+<div class="title">Cliffhanger &#8230;&#8203; to be continued - Image by <a href="https://pixabay.com/users/wallace769-5217358/">Shri ram</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
 <div class="paragraph">
 <p>There is also the possibility to implement the database credential renewal in the application itself. Spring itself
 does not provide a generic way to do this. In the next blog post I&#8217;ll show a way how to do this manually if you use
