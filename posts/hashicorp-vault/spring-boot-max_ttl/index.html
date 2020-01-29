@@ -152,18 +152,11 @@ secret expires</a></p>
 <h2 id="_disclaimer_about_kotlin_in_code_examples">Disclaimer about Kotlin in code examples</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I&#8217;m using Kotlin instead of Java for the Spring code examples. The main reason is that I like Kotlin much more because it
-allows me to write really good readable and concise code (just to pick two out of many reasons) with imho
-nearly no disadvantages. Also, in the context of Spring Kotlin works perfectly fine. For myself I try to use a
-Kotlin-first approach whenever possible, so I&#8217;ll also do this with my code examples.</p>
+<p>All code examples use (ideomatic) Kotlin instead of Java to make them more concise and easier to read (and personally I
+prefer Kotlin). The same approach of the code snippets would also working with Java or other JVM languages.</p>
 </div>
 <div class="paragraph">
-<p>My goal is to use readable and idiomatic Kotlin code and I expect the examples should still be understandable also for
-Java developers. And if you get the idea of the solution, adapting it to Java is just a small step.</p>
-</div>
-<div class="paragraph">
-<p>Obviously, most people still use Java and having examples in your native language is always more convenient and allows
-copy-and-pasting some snippets directly. That&#8217;s why all code examples will also be available in Java in a future update
+<p>Obviously, most people still use Java. That&#8217;s why all code examples will also be available in Java in a future update
 of this post.</p>
 </div>
 </div>
@@ -172,19 +165,19 @@ of this post.</p>
 <h2 id="_challenges_with_hashicorp_vault_and_secrets_management">Challenges with Hashicorp Vault and Secrets Management</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If you have a Spring Boot application or microservice sooner or later (better sooner) you have to think about how to
+<p>If you have a Spring Boot application or microservice, sooner or later (better sooner) you have to think about how to
 handle the secrets in your code in a secure manner. Fortunately, these days there are already really good
 <a href="https://www.thoughtworks.com/radar/techniques/secrets-as-a-service">secrets as a service</a> tools available. The most
 famous and mature one is <a href="https://www.vaultproject.io/">Hashicorp Vault</a>. As a Kotlin or Java developer building a Spring
-Boot application you are in a lucky situation, because Hashicorp Vault it is really easy to get your Vault integration
-up and running by usinghttps://spring.io/projects/spring-vault[Spring Vault]. Vault&#8217;s concept of
+Boot application you are in a lucky situation, because it is really easy to get your Hashicorp Vault integration
+up and running by using <a href="https://spring.io/projects/spring-vault">Spring Vault</a>. Vault&#8217;s concept of
 <a href="https://www.hashicorp.com/blog/why-we-need-dynamic-secrets/">dynamic secrets</a> is probably THE killer feature and allows
-you for example to easily get unique, secure and short-lived database credentials with just the privileges your
-application needs to work.</p>
+you for example to easily get unique, secure and short-lived database credentials which follow the
+<a href="https://en.wikipedia.org/wiki/Principle_of_least_privilege">principle of least privilege</a>.</p>
 </div>
 <div class="paragraph">
 <p>There are quite good examples how to get started with Spring, Vault and e.g.
-<a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets">postgres</a>,
+<a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets">PostgreSQL</a>,
 <a href="https://www.vaultproject.io/docs/secrets/databases/mysql-maria/">MySQL</a>,
 <a href="https://www.vaultproject.io/docs/secrets/databases/mongodb/">MongoDB</a> and
 <a href="https://www.vaultproject.io/docs/secrets/databases/">many other databases</a>.
@@ -248,13 +241,13 @@ that 24 hours after your application has started it can no longer authenticate w
 </blockquote>
 </div>
 <div class="paragraph">
-<p>This is really unfortunate, because it will leave the Spring application in a broken state where no database
+<p>This is a show stopper, because it will leave the Spring application in a broken state where no database
 communication is possible anymore. So, what can you do about this?</p>
 </div>
 <div class="paragraph">
-<p>I can offer you 4 solutions. The first 3 are more generically applicable with some prerequisites to apply. The 4th
-solution is only working for a more specific but also not too uncommon setup and provides a smoother experience. I will
-describe it&#8217;s details in a follow-up blog post.</p>
+<p>I will show you 4 solutions on how to make the setup work. The first 3 are more generically applicable with some
+prerequisites to apply. The 4th solution is only working for a more specific but also not too uncommon setup and
+provides a smoother experience. I will describe its details in the next blog post.</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s check our options.</p>
@@ -450,8 +443,8 @@ which eventually shuts down the Spring application:</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>There is also the possibility to implement the database credential renewal in the application itself. Spring itself
-does not provide a generic way to do this. That&#8217;s why I want to show a way how to do this manually if you use Spring
-with HikariCP as JDBC connection pool. This for example works for postgres or MySQL databases.</p>
+does not provide a generic way to do this. In the next blog post I&#8217;ll show a way how to do this manually if you use
+Spring with HikariCP as JDBC connection pool, which works for example with PostgreSQL or MySQL databases.</p>
 </div>
 </div>
 </div>
