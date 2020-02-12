@@ -6,6 +6,8 @@
         <description>Recent content on Secrets as a Service</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
+        <managingEditor>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</managingEditor>
+        <webMaster>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</webMaster>
         <lastBuildDate>Tue, 28 Jan 2020 20:51:34 +0100</lastBuildDate>
         
         <atom:link href="https://secrets-as-a-service.com/index.xml" rel="self" type="application/rss+xml" />
@@ -15,13 +17,9 @@
             <title>Hashicorp Vault max_ttl Killed My Spring App</title>
             <link>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</link>
             <pubDate>Tue, 28 Jan 2020 20:51:34 +0100</pubDate>
-            
+            <author>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</author>
             <guid>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</guid>
-            <description>Image by Maike und Björn Bröskamp from pixabay  TL;DR Spring Cloud Vault does not renew your dynamic database secret which leaves the application in a broken state when these credentials expire.
- There are following options:
-  Use a long enough max_ttl and redeploy/restart the application often enough
-  If needed, increase the Vault system max time-to-live
-  Restart the Spring Boot application when the database secret expires</description>
+            <description>How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl</description>
         </item>
         
     </channel>

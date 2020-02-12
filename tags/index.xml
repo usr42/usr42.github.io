@@ -6,6 +6,8 @@
         <description>Recent content in Tags on Secrets as a Service</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
+        <managingEditor>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</managingEditor>
+        <webMaster>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</webMaster>
         
         <atom:link href="https://secrets-as-a-service.com/tags/index.xml" rel="self" type="application/rss+xml" />
         
