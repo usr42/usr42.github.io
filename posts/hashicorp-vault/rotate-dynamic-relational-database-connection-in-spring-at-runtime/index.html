@@ -128,22 +128,22 @@ Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring · Secre
 <div class="paragraph">
 <p>It is possible to <strong>rotate the Spring Cloud Vault database credentials at runtime</strong> for relational databases if you use
 <strong>HikariCP</strong>.
-To do so add a <code>LeaseListenener</code> (<code>SecretLeaseEventPublisher#addLeaseListener</code>) which</p>
+To do so add a <code>LeaseListenener</code> via <code>addLeaseListener()</code> which</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>calls <code>SecretLeaseContainer#requestRotatingSecret()</code> when the dynamic database lease expires</p>
+<p>calls <code>requestRotatingSecret()</code> on the <code>SecretLeaseContainer</code> when the dynamic database lease expires</p>
 </li>
 <li>
 <p>reacts on a <code>SecretLeaseCreatedEvent</code> with mode <code>ROTATE</code>) by:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>setting username and password on <code>HikariDataSource#getHikariConfigMXBean()</code></p>
+<p>setting username and password on the <code>HikariConfigMXBean</code> of the <code>HikariDataSource</code></p>
 </li>
 <li>
-<p>call <code>HikariPoolMXBean#softEvictConnections()</code> to use the new credentials</p>
+<p>call <code>softEvictConnections()</code> on the <code>HikariPoolMXBean</code> to use the new credentials</p>
 </li>
 </ul>
 </div>
@@ -374,7 +374,7 @@ Let&#8217;s again autowire the <code>SecretLeaseContainer</code> and the databas
 </table>
 </div>
 <div class="paragraph">
-<p>The returned value of <code>leaseContainer.requestRotatingSecret()</code> is of type
+<p>The returned value of <code>requestRotatingSecret()</code> is of type
 <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/domain/RequestedSecret.html"><code>RequestedSecret</code></a>:</p>
 </div>
 <div class="quoteblock">
