@@ -136,8 +136,7 @@ To do so add a <code>LeaseListenener</code> (<code>SecretLeaseEventPublisher#add
 <p>calls <code>SecretLeaseContainer#requestRotatingSecret()</code> when the dynamic database lease expires</p>
 </li>
 <li>
-<p>updates the HikariCP credentials when the new database credentials are received (<code>SecretLeaseCreatedEvent</code> with mode
-<code>ROTATE</code>) by:</p>
+<p>reacts on a <code>SecretLeaseCreatedEvent</code> with mode <code>ROTATE</code>) by:</p>
 <div class="ulist">
 <ul>
 <li>
