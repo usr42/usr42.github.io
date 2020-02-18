@@ -8,10 +8,19 @@
         <language>en-us</language>
         <managingEditor>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</managingEditor>
         <webMaster>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</webMaster>
-        <lastBuildDate>Tue, 28 Jan 2020 20:51:34 +0100</lastBuildDate>
+        <lastBuildDate>Tue, 18 Feb 2020 10:59:36 +0100</lastBuildDate>
         
         <atom:link href="https://secrets-as-a-service.com/posts/hashicorp-vault/index.xml" rel="self" type="application/rss+xml" />
         
+        
+        <item>
+            <title>Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring</title>
+            <link>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</link>
+            <pubDate>Tue, 18 Feb 2020 10:59:36 +0100</pubDate>
+            <author>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</author>
+            <guid>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</guid>
+            <description>Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime</description>
+        </item>
         
         <item>
             <title>Hashicorp Vault max_ttl Killed My Spring App</title>

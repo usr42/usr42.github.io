@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Balthasar Biedermann">
+    <meta name="description" content="Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime">
+    <meta name="keywords" content="blog,developer,personal,security,devops,software,hashicorp,vault,spring">
+
+    <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://secrets-as-a-service.com/images/turntable-1328823_1920.jpg"/>
+
+<meta name="twitter:title" content="Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring"/>
+<meta name="twitter:description" content="Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime"/>
+
+    <meta property="og:title" content="Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring" />
+<meta property="og:description" content="Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/" />
+<meta property="og:image" content="https://secrets-as-a-service.com/images/turntable-1328823_1920.jpg" />
+<meta property="article:published_time" content="2020-02-18T10:59:36+01:00" />
+<meta property="article:modified_time" content="2020-02-18T10:59:36+01:00" />
+
+
+    
+      <base href="https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/">
+    
+    <title>
+Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring · Secrets as a Service
+</title>
+
+    
+      <link rel="canonical" href="https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.94221195bea5f37af71181ecb2fc2c26510c4f0083fc0a61fb4717ee19f33f94.css" integrity="sha256-lCIRlb6l83r3EYHssvwsJlEMTwCD/Aph&#43;0cX7hnzP5Q=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="/css/blockSwitch.css" />
+    
+
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+    
+      <script src="/js/blockSwitch.js"></script>
+    
+
+    
+
+    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.64.1" />
+  </head>
+
+  
+  
+  <body class="colorscheme-light">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Secrets as a Service
+    </a>
+    
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://secrets-as-a-service.com/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+<section class="container post">
+  <article>
+    <header>
+      <div class="post-title">
+        <h1 class="title">Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring</h1>
+        <h2 class="subtitle">Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime</h2>
+      </div>
+      <div class="post-meta">
+        <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2020-02-18T10:59:36&#43;01:00'>
+                Feb 18, 2020
+              </time>
+            </span>
+          <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              8-minute read
+            </span>
+        </div>
+        
+        
+      </div>
+    </header>
+
+    <div>
+      <div class="sect1">
+<h2 id="_tldr">TL;DR</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is possible to <strong>rotate the Spring Cloud Vault database credentials at runtime</strong> for relational databases if you use
+<strong>HikariCP</strong>.
+To do so add a <code>LeaseListenener</code> (<code>SecretLeaseEventPublisher#addLeaseListener</code>) which</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>calls <code>SecretLeaseContainer#requestRotatingSecret()</code> when the dynamic database lease expires</p>
+</li>
+<li>
+<p>updates the HikariCP credentials when the new database credentials are received (<code>SecretLeaseCreatedEvent</code> with mode
+<code>ROTATE</code>) by:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>setting username and password on <code>HikariDataSource#getHikariConfigMXBean()</code></p>
+</li>
+<li>
+<p>call <code>HikariPoolMXBean#softEvictConnections()</code> to use the new credentials</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_new_spring_cloud_vault_database_secrets_without_downtime">New Spring Cloud Vault database secrets without downtime</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/turntable-1328823_1920.jpg" alt="Vinyl on Heavy Rotation">
+</div>
+<div class="title">Database Secrets on Heavy Rotation - Image by <a href="https://pixabay.com/de/users/Egle_pe-1340873/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1328823">Egle P.</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
+<div class="paragraph">
+<p>This is the second episode in a series of blog post about how to handle the expiration of Hashicorp Vault generated
+dynamic database credentials in a Spring application. <strong>Spring Cloud Vault does not handle the expiration of dynamic
+database credentials, which leaves your Spring application in a broken state without a working database connection.</strong>
+For more context and some general solutions please check the <a href="../spring-boot-max_ttl/">first post</a>.</p>
+</div>
+<div class="paragraph">
+<p>This time I would like to <strong>show you how to renew the database credential at runtime</strong>. So, this time you neither need to
+<a href="../spring-boot-max_ttl/#_use_a_long_enough_max_ttl_for_the_dynamic_database_credential">
+regularly restart or redeploy your application</a> nor to
+<a href="../spring-boot-max_ttl/#_when_the_vault_system_maximum_ttl_is_not_enough">
+use a (probably too) long maximum time-to-live for the credentials</a> nor do you have to
+<a href="../spring-boot-max_ttl/#_restarting_the_application_when_credentials_expire">
+programmatically restart the application</a>, which could potentially result in downtime or not met
+<a href="https://en.wikipedia.org/wiki/Service-level_agreement">SLAs</a>.</p>
+</div>
+<div class="paragraph">
+<p>As we all know
+<a href="https://en.wikipedia.org/wiki/There_ain%27t_no_such_thing_as_a_free_lunch">there ain&#8217;t no such thing as a free lunch</a>.
+The costs for the approach I am presenting you this time are:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>more implementation effort</p>
+</li>
+<li>
+<p>stricter prerequisites (only relational databases supported)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The first bullet point is addressed because this post should help you with the implementation. This leaves us with
+the&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This approach is only applicable for Spring applications which use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/brettwooldridge/HikariCP"><strong>HikariCP</strong></a> as database connection pool</p>
+</li>
+<li>
+<p>Hikari only works with <a href="https://en.wikipedia.org/wiki/Java_Database_Connectivity"><strong>JDBC</strong></a></p>
+</li>
+<li>
+<p>JDBC is oriented towards <a href="https://en.wikipedia.org/wiki/Relational_database"><strong>relational databases</strong></a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>On the other hand, the usual way to store and retrieve data in a relational database with
+<a href="https://spring.io/projects/spring-boot">Spring Boot</a> is to use <a href="https://spring.io/guides/gs/accessing-data-jpa/">Spring
+Data JPA</a>. <strong>In Spring Boot 2, Hikari is the default DataSource implementation</strong>, which makes it typical setup for
+using relational databases.</p>
+</div>
+<div class="sect2">
+<h3 id="_show_me_the_code">Show me the code</h3>
+<div class="paragraph">
+<p>To fulfill the prerequisites, it is enough to depend on the Spring Boot JPA Starter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">plugins</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"org.springframework.boot"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"2.2.2.RELEASE"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"io.spring.dependency-management"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"1.0.8.RELEASE"</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span style="color: #93a1a1">}</span>
+
+<span style="color: #93a1a1;background-color: #002b36">dependencies</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">implementation</span><span style="color: #93a1a1">(</span><span style="color: #859900">"org.springframework.boot:spring-boot-starter-data-jpa"</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="3"></i><b>(3)</b>
+    <span style="color: #93a1a1;background-color: #002b36">runtimeOnly</span><span style="color: #93a1a1">(</span><span style="color: #859900">"org.postgresql:postgresql"</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="4"></i><b>(4)</b>
+<span style="color: #93a1a1">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>You don&#8217;t have to use the Spring Boot Gradle plugin, but it makes your live easier</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The Spring dependency-management plugin together with Spring Boot Gradle plugin ensures that all Spring related
+dependencies have the version being compatible with the Spring Boot version</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>By adding the <code>spring-boot-starter-data-jpa</code> dependency together with Spring Boot 2.x you automatically get HikariCP</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>In my example I use PostgreSQL but also most other relational databases, like MySQL, would work</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These few lines are basically enough to meet the requirements of using HikariCP, in this case with PostgreSQL.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rotating_the_expiring_database_credentials_at_runtime">Rotating the expiring database credentials at runtime</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/fan-3645379_1920.jpg" alt="Big rotating fans">
+</div>
+<div class="title">Rotation at runtime - Image by <a href="https://pixabay.com/de/users/Tama66-1032521/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=3645379">Peter H</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
+<div class="paragraph">
+<p>To rotate the database credentials, which are dynamic secret from Hashicorp Vaults point of view, we have to do
+following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#_detect_when_the_database_credentials_are_expiring">Detect when the database credentials are expiring</a></p>
+</li>
+<li>
+<p><a href="#_get_new_dynamic_database_credentials_from_hashicorp_vault">Get new dynamic database credentials from Hashicorp Vault</a></p>
+</li>
+<li>
+<p><a href="#_refresh_the_database_connection">Refresh the database connections to use the new credentials</a></p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_detect_when_the_database_credentials_are_expiring">Detect when the database credentials are expiring</h3>
+<div class="paragraph">
+<p>To detect when the database credentials are expiring we can use the same approach like we did to
+<a href="../spring-boot-max_ttl/#_restarting_the_application_when_credentials_expire">restart the application when credentials expire in the first blog post</a>.
+Let&#8217;s again autowire the <code>SecretLeaseContainer</code> and the database role which is configured as the property
+<code>spring.cloud.vault.database.role</code> to the <code>VaultConfig</code> configuration class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@Configuration</span>
+<span style="color: #cb4b16">class</span> <span style="color: #b58900">VaultConfig</span><span style="color: #93a1a1">(</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">SecretLeaseContainer</span><span style="color: #93a1a1">,</span>
+        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">"\${spring.cloud.vault.database.role}"</span><span style="color: #93a1a1">)</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">databaseRole</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span>
+<span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As before in a <code>@PostConstruct</code> method you can then add the additional <code>LeaseListenener</code> which does the lease rotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@PostConstruct</span>
+<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">postConstruct</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">"database/creds/$databaseRole"</span>
+    <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">addLeaseListener</span> <span style="color: #93a1a1">{</span> <span style="color: #93a1a1;background-color: #002b36">event</span> <span style="color: #93a1a1">-&gt;</span>
+        <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">==</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+            <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Lease change for DB: ($event) : (${event.lease})"</span> <span style="color: #93a1a1">}</span>
+            <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">RENEW</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+                <span style="color: #657b83">// TODO Rotate the credentials here </span><i class="conum" data-value="1"></i><b>(1)</b>
+            <span style="color: #93a1a1">}</span>
+        <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1">}</span>
+<span style="color: #93a1a1">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>When this code path is reached, the database secret expired</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Next step is to&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_get_new_dynamic_database_credentials_from_hashicorp_vault">Get new dynamic database credentials from Hashicorp Vault</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/rust-3745490_1920.jpg" alt="An old and rusty lock">
+</div>
+<div class="title">The credentials should be renewed - Image by <a href="https://pixabay.com/de/users/pasja1000-6355831/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=3745490">pasja1000</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
+<div class="paragraph">
+<p>When the lease for the database credentials expire we have to request a new secret.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">RENEW</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Replace RENEW for expired credential with ROTATE"</span> <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">requestRotatingSecret</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span style="color: #93a1a1">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Tells Spring Vault to request a new rotating database secret</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The returned value of <code>leaseContainer.requestRotatingSecret()</code> is of type
+<a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/domain/RequestedSecret.html"><code>RequestedSecret</code></a>:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Represents a requested secret from a specific Vault path associated with a lease <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/domain/RequestedSecret.Mode.html">RequestedSecret.Mode</a>.</p>
+</div>
+<div class="paragraph">
+<p>A <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/domain/RequestedSecret.Mode.html">RequestedSecret</a> can be renewing or rotating.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Spring Vault Javadoc
+</div>
+</div>
+<div class="paragraph">
+<p>As mentioned in the Javadoc, the <code>RequestedSecret</code> contains the path and the mode of the secret, but it does not
+contain the secret itself. So how do we get the requested credentials?</p>
+</div>
+<div class="paragraph">
+<p>We have just requested a new rotating database secret within our own
+<a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/event/LeaseListener.html"><code>LeaseListener</code></a>.
+This listener receives <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/event/SecretLeaseEvent.html"><code>SecretLeaseEvent</code></a>s
+which are also created, when a new rotating secret is received. This is exactly what we need! So, let&#8217;s also
+react on this kind of event.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">RENEW</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Replace RENEW for expired credential with ROTATE"</span> <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">requestRotatingSecret</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span style="color: #93a1a1">}</span> <span style="color: #6c71c4">else</span> <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span> <span style="color: #6c71c4">is</span> <span style="color: #b58900">SecretLeaseCreatedEvent</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">ROTATE</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">credential</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span> <i class="conum" data-value="3"></i><b>(3)</b>
+    <span style="color: #657b83">// TODO Update database connection</span>
+<span style="color: #93a1a1">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The rotating secret is requested</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The new secret event is a rotating <code>SecretLeaseCreatedEvent</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The event contains the new database credentials</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/event/SecretLeaseCreatedEvent.html"><code>SecretLeaseCreatedEvent</code></a>
+contains the new credentials requested from Hashicorp Vault. The <code>event.credential</code> property (see
+<a href="https://kotlinlang.org/docs/reference/properties.html">Kotlin properties</a>) is an <a href="https://kotlinlang.org/docs/reference/extensions.html#extension-properties">extension property</a>
+(see code below).</p>
+</div>
+<div class="paragraph">
+<p>The <code>SecretLeaseCreatedEvent</code> contains a <code>Map&lt;String, Object&gt;</code> with the secrets, so there is no typesafe to get
+the database credentials. If for some reason the event does not contain the credentials we are again in the situation,
+that we cannot contact the database anymore. In that case I would prefer to shut down the application. That&#8217;s why we
+need the <code>ConfigurableApplicationContext</code> to shut down the Spring application. Let&#8217;s add this as another autowired
+dependency to this class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@Configuration</span>
+<span style="color: #cb4b16">class</span> <span style="color: #b58900">VaultConfig</span><span style="color: #93a1a1">(</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">SecretLeaseContainer</span><span style="color: #93a1a1">,</span>
+        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">"\${spring.cloud.vault.database.role}"</span><span style="color: #93a1a1">)</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">databaseRole</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span>
+<span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can extract the credentials from the event and handle the error case:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span>
+    <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">=</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">(</span><span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"username"</span><span style="color: #93a1a1">),</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"password"</span><span style="color: #93a1a1">))</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #b58900">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">get</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">):</span> <span style="color: #b58900">String</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">value</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">secrets</span><span style="color: #93a1a1">[</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">]</span> <span style="color: #6c71c4">as</span><span style="color: #93a1a1">?</span> <span style="color: #b58900">String</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">value</span> <span style="color: #93a1a1">==</span> <span style="color: #6c71c4">null</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
+        <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span>
+            <span style="color: #859900">"Cannot update DB credentials (no $param available). Shutting down."</span>
+        <span style="color: #93a1a1">}</span>
+        <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">close</span><span style="color: #93a1a1">()</span>
+        <span style="color: #6c71c4">throw</span> <span style="color: #b58900">IllegalStateException</span><span style="color: #93a1a1">(</span><span style="color: #859900">"Cannot get $param from secrets"</span><span style="color: #93a1a1">)</span>
+    <span style="color: #93a1a1">}</span>
+    <span style="color: #6c71c4">return</span> <span style="color: #93a1a1;background-color: #002b36">value</span> <i class="conum" data-value="4"></i><b>(4)</b>
+<span style="color: #93a1a1">}</span>
+
+<span style="color: #6c71c4">private</span> <span style="color: #cb4b16">data class</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">(</span><span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">,</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">)</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>username and password are extracted using the extension method <code>get()</code> and fill them into the <code>Credential</code> data
+class</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>with the <a href="https://kotlinlang.org/docs/reference/typecasts.html#safe-nullable-cast-operator">safe cast operator <code>as?</code></a>
+the secret is read out of the map</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>if the secret is not existing or not a string the value is <code>null</code>. In that case an error is logged, the application
+is shut down and an Exception is thrown</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Because of the thrown Exception the value is smart casted to non-nullable String. Kotlin is awesome!</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_refresh_the_database_connection">Refresh the database connection</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="/images/door-1089560_1920.jpg" alt="A new and modern door lock">
+</div>
+<div class="title">Refreshed version of access restriction - Image by <a href="https://pixabay.com/users/neshom-447256/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1089560">Nenad Maric</a> from <a href="https://pixabay.com/">pixabay</a></div>
+</div>
+<div class="paragraph">
+<p>Now that we know the new credentials we have to ensure that these fresh secrets are used instead of the old ones.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">updateDbProperties</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span style="color: #93a1a1;background-color: #002b36">updateDataSource</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>first update the database system properties</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>finally update the datasource to use the newly created credentials</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To update the datasource credentials we need the
+<a href="https://www.javadoc.io/doc/com.zaxxer/HikariCP/latest/com/zaxxer/hikari/HikariDataSource.html"><code>HikariDataSource</code></a>.
+So, let&#8217;s add this also to the constructor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@Configuration</span>
+<span style="color: #cb4b16">class</span> <span style="color: #b58900">VaultConfig</span><span style="color: #93a1a1">(</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">ConfigurableApplicationContext</span><span style="color: #93a1a1">,</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">hikariDataSource</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">HikariDataSource</span><span style="color: #93a1a1">,</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">SecretLeaseContainer</span><span style="color: #93a1a1">,</span>
+        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">"\${spring.cloud.vault.database.role}"</span><span style="color: #93a1a1">)</span>
+        <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">databaseRole</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span>
+<span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Utilizing the <code>HikariDataSource</code> we can update the database credentials used by the Spring application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">updateDbProperties</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">,</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">credential</span>
+    <span style="color: #b58900">System</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">setProperty</span><span style="color: #93a1a1">(</span><span style="color: #859900">"spring.datasource.username"</span><span style="color: #93a1a1">,</span> <span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">)</span>
+    <span style="color: #b58900">System</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">setProperty</span><span style="color: #93a1a1">(</span><span style="color: #859900">"spring.datasource.password"</span><span style="color: #93a1a1">,</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">)</span>
+<span style="color: #93a1a1">}</span>
+
+<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">updateDataSource</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">,</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">credential</span>
+    <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"==&gt; Update database credentials"</span> <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1;background-color: #002b36">hikariDataSource</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">hikariConfigMXBean</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">apply</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="2"></i><b>(2)</b>
+        <span style="color: #93a1a1;background-color: #002b36">setUsername</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">)</span>
+        <span style="color: #93a1a1;background-color: #002b36">setPassword</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">)</span>
+    <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1;background-color: #002b36">hikariDataSource</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">hikariPoolMXBean</span><span style="color: #93a1a1">?.</span><span style="color: #93a1a1;background-color: #002b36">softEvictConnections</span><span style="color: #93a1a1">()</span> <i class="conum" data-value="3"></i><b>(3)</b>
+            <span style="color: #93a1a1">?.</span><span style="color: #93a1a1;background-color: #002b36">also</span> <span style="color: #93a1a1">{</span> <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Soft Evict Hikari Data Source Connections"</span> <span style="color: #93a1a1">}</span> <span style="color: #93a1a1">}</span>
+            <span style="color: #93a1a1">?:</span> <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">warn</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"CANNOT Soft Evict Hikari Data Source Connections"</span> <span style="color: #93a1a1">}</span>
+<span style="color: #93a1a1">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Updating the database system properties is technically not mandatory but ensures consistency, if other parts of the
+system rely these properties being accurate</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>From the <code>HikariDataSource</code> we can get the
+<a href="https://www.javadoc.io/doc/com.zaxxer/HikariCP/latest/com/zaxxer/hikari/HikariConfigMXBean.html"><code>HikariConfigMXBean</code></a>
+which allows setting the new credentials</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>As the final step, all connections have to be evicted to use the new credentials</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With these steps the PostgreSQL or other relational database credentials can be rotated, when there Hashicorp Vault
+leases expire. This works at runtime and without downtime.</p>
+</div>
+<div class="paragraph">
+<p>The logs will look something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code>Lease change for DB: (org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent[source=RequestedSecret [path='database/creds/readonly', mode=RENEW]]) : (Lease [leaseId='database/creds/readonly/wzUQ81Ng4YQcBwdAyLrSZSvd', leaseDuration=PT10S, renewable=true])
+Replace RENEW for expired credential with ROTATE
+Lease change for DB: (org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent[source=RequestedSecret [path='database/creds/readonly', mode=ROTATE]]) : (Lease [leaseId='database/creds/readonly/ur8C5V1wJMSAdiatwkWXCi03', leaseDuration=PT30S, renewable=true])
+==&gt; Update database credentials
+Soft Evict Hikari Data Source Connections</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The complete repository can be found <a href="https://github.com/usr42/spring-vault-database-rotate">on GitHub</a>.</p>
+</div>
+<div class="paragraph">
+<p>This handling of expiring Hashicorp Vault database secrets in a Spring application is production-ready.</p>
+</div>
+</div>
+</div>
+
+    </div>
+
+    <footer>
+      
+
+
+      
+      
+      
+    </footer>
+  </article>
+
+  
+</section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <a href="/impressum">Impressum</a>
+    
+    
+    
+    
+    <a href="https://github.com/usr42" aria-label="Github" >
+      <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+    </a>
+    
+    
+    
+    <a href="https://www.linkedin.com/in/balthasar-biedermann-742170107/" aria-label="LinkedIn" >
+      <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+    </a>
+    
+    
+    
+    
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

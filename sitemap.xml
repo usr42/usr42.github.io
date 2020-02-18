@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</loc>
-    <lastmod>2020-01-28T20:51:34+01:00</lastmod>
+    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</loc>
+    <lastmod>2020-02-18T10:59:36+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://secrets-as-a-service.com/</loc>
-    <lastmod>2020-01-28T20:51:34+01:00</lastmod>
+    <lastmod>2020-02-18T10:59:36+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/</loc>
+    <lastmod>2020-02-18T10:59:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</loc>
     <lastmod>2020-01-28T20:51:34+01:00</lastmod>
   </url>
   
