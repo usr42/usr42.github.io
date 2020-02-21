@@ -140,6 +140,29 @@ Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.</p>
 Wir weisen darauf hin, dass die Datenübertragung im Internet (z.B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.
 Der Nutzung von im Rahmen der Impressumspflicht veröffentlichten Kontaktdaten durch Dritte zur Übersendung von nicht ausdrücklich angeforderter Werbung und Informationsmaterialien wird hiermit ausdrücklich widersprochen. Die Betreiber der Seiten behalten sich ausdrücklich rechtliche Schritte im Falle der unverlangten Zusendung von Werbeinformationen, etwa durch Spam-Mails, vor.</p>
 <p>Der Webserver schreibt Logdateien mit den Zugriffen und den IP-Adressen der Zugreifer. Diese dienen der Fehlersuche im Krisenfall und werden ansonsten nicht ausgewertet. Da es hier keine Benutzerkonten und keine Tracking-Cookies o.ä. gibt, betrachte ich diese Logdateien nicht als personenbezogen.</p>
+<p>Diese Webseite verwendet <a href="https://matomo.org/">Matomo</a>, eine Open Source, selbstgehostete Software um anonyme Nutzungsdaten für diese Webseite zu sammeln.</p>
+<p>Die Daten zum Verhalten der Besucher werden gesammelt um eventuelle Probleme wie nicht gefundene Seiten, Suchmaschinenprobleme oder unbeliebte Seiten herauszufinden. Sobald die Daten (Anzahl der Besucher die Fehlerseiten oder nur eine Seite sehen, usw.) verarbeitet werden, erzeugt Matomo Berichte für die Webseitenbetreiber, damit diese darauf reagieren können. (Layoutveränderungen, neue Inhalte, usw.)</p>
+<p>Matomo verarbeitet die folgenden Daten:</p>
+<ul>
+<li>Anonymisierte IP-Adressen indem das letzte byte entfernt wird (also 198.51.100.0 anstatt 198.51.100.54)</li>
+<li>Pseudoanonymisierter Standort (basierend auf der anonymisierten IP-Adresse</li>
+<li>Datum und Uhrzeit</li>
+<li>Titel der aufgerufenen Seite</li>
+<li>URL der aufgerufenen Seite</li>
+<li>URL der vorhergehenden Seite (sofern diese das erlaubt)</li>
+<li>Bildschirmauflösung</li>
+<li>Lokale Zeit</li>
+<li>Dateien die angeklickt und heruntergeladen wurden</li>
+<li>Externe Links</li>
+<li>Dauer des Seitenaufbaus</li>
+<li>Land, Region, Stadt (mit niedriger Genauigkeit aufgrund von IP-Adresse)</li>
+<li>Hauptsprache des Browsers</li>
+<li>User Agent des Browsers</li>
+<li>Interaktionen mit Formularen (aber nicht deren Inhalt)</li>
+</ul>
+<p>Matomo verwendet auf dieser Webseite keine Cookies.</p>
+<h5 id="widerrufsmöglichkeit">Widerrufsmöglichkeit</h5>
+<iframe frameborder="no" width="500px" height="250px" src="https://matomo.secrets-as-a-service.com//index.php?module=CoreAdminHome&action=optOut&language=de"></iframe>
 <h3 id="copyrights">Copyrights</h3>
 <p>Favicon: <a target="_blank" rel="noopener" href="https://icons8.de/icons/set/safe-ok">Tresor sicher</a> icon by <a target="_blank" rel="noopener" href="https://icons8.de">Icons8</a></p>
 
@@ -184,6 +207,24 @@ Der Nutzung von im Rahmen der Impressumspflicht veröffentlichten Kontaktdaten d
     <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
     
     <script src="/js/blockSwitch.js"></script>
+    
+    
+    <script type="text/javascript">
+      var _paq = window._paq || [];
+       
+      _paq.push(["setDoNotTrack", true]);
+      _paq.push(["disableCookies"]);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="https://matomo.secrets-as-a-service.com/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '1']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <noscript><p><img src="https://matomo.secrets-as-a-service.com/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
     
   </body>
 
