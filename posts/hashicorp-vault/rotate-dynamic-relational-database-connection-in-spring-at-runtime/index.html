@@ -427,7 +427,7 @@ contains the new credentials requested from Hashicorp Vault. The <code>event.cre
 (see code below).</p>
 </div>
 <div class="paragraph">
-<p>The <code>SecretLeaseCreatedEvent</code> contains a <code>Map&lt;String, Object&gt;</code> with the secrets, so there is no typesafe to get
+<p>The <code>SecretLeaseCreatedEvent</code> contains a <code>Map&lt;String, Object&gt;</code> with the secrets, so there is no typesafe option to get
 the database credentials. If for some reason the event does not contain the credentials we are again in the situation,
 that we cannot contact the database anymore. In that case I would prefer to shut down the application. That&#8217;s why we
 need the <code>ConfigurableApplicationContext</code> to shut down the Spring application. Let&#8217;s add this as another autowired
