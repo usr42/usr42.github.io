@@ -206,23 +206,11 @@ the&#8230;&#8203;</p>
 <h2 id="_prerequisites">Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This approach is only applicable for Spring applications which use:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://github.com/brettwooldridge/HikariCP"><strong>HikariCP</strong></a> as database connection pool</p>
-</li>
-<li>
-<p>Hikari only works with <a href="https://en.wikipedia.org/wiki/Java_Database_Connectivity"><strong>JDBC</strong></a></p>
-</li>
-<li>
-<p>JDBC is oriented towards <a href="https://en.wikipedia.org/wiki/Relational_database"><strong>relational databases</strong></a></p>
-</li>
-</ul>
+<p>This approach is only applicable for Spring applications which use
+<a href="https://github.com/brettwooldridge/HikariCP"><strong>HikariCP</strong></a>.</p>
 </div>
 <div class="paragraph">
-<p>On the other hand, the usual way to store and retrieve data in a relational database with
+<p>Luckily the usual way to store and retrieve data in a relational database with
 <a href="https://spring.io/projects/spring-boot">Spring Boot</a> is to use <a href="https://spring.io/guides/gs/accessing-data-jpa/">Spring
 Data JPA</a>. In Spring Boot 2, Hikari is the default DataSource implementation, which makes it typical setup for
 using relational databases.</p>
@@ -235,8 +223,8 @@ using relational databases.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">plugins</span> <span style="color: #93a1a1">{</span>
-    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"org.springframework.boot"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"2.2.2.RELEASE"</span> <i class="conum" data-value="1"></i><b>(1)</b>
-    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"io.spring.dependency-management"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"1.0.8.RELEASE"</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"org.springframework.boot"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"2.2.4.RELEASE"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #93a1a1;background-color: #002b36">id</span><span style="color: #93a1a1">(</span><span style="color: #859900">"io.spring.dependency-management"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1;background-color: #002b36">version</span> <span style="color: #859900">"1.0.9.RELEASE"</span> <i class="conum" data-value="2"></i><b>(2)</b>
 <span style="color: #93a1a1">}</span>
 
 <span style="color: #93a1a1;background-color: #002b36">dependencies</span> <span style="color: #93a1a1">{</span>
