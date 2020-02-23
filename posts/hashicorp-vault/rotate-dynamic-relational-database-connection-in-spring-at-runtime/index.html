@@ -127,8 +127,11 @@ Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring · Secre
 <h2 id="_tldr">TL;DR</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>It is possible to <strong>rotate the Spring Cloud Vault database credentials at runtime</strong> for relational databases if you use
-<strong>HikariCP</strong>.
+<p>The first episode of this series of blog posts can be found here: <a href="../spring-boot-max_ttl/">Hashicorp Vault <code>max_ttl</code> Killed My Spring App</a></p>
+</div>
+<div class="paragraph">
+<p>It is possible to rotate the Spring Cloud Vault database credentials at runtime for relational databases if you use
+HikariCP.
 To do so add a <code>LeaseListenener</code> via <code>addLeaseListener()</code> which</p>
 </div>
 <div class="ulist">
@@ -164,12 +167,12 @@ To do so add a <code>LeaseListenener</code> via <code>addLeaseListener()</code> 
 </div>
 <div class="paragraph">
 <p>This is the second episode in a series of blog post about how to handle the expiration of Hashicorp Vault generated
-dynamic database credentials in a Spring application. <strong>Spring Cloud Vault does not handle the expiration of dynamic
-database credentials, which leaves your Spring application in a broken state without a working database connection.</strong>
-For more context and some general solutions please check the <a href="../spring-boot-max_ttl/">first post</a>.</p>
+dynamic database credentials in a Spring application. Spring leaves your application without a database connection
+when these credentials expire. For more context and some general solutions please check the
+<a href="../spring-boot-max_ttl/">first post</a>.</p>
 </div>
 <div class="paragraph">
-<p>This time I would like to <strong>show you how to renew the database credential at runtime</strong>. So, this time you neither need to
+<p>This time I would like to show you how to renew the database credential at runtime. So, this time you neither need to
 <a href="../spring-boot-max_ttl/#_use_a_long_enough_max_ttl_for_the_dynamic_database_credential">
 regularly restart or redeploy your application</a> nor to
 <a href="../spring-boot-max_ttl/#_when_the_vault_system_maximum_ttl_is_not_enough">
@@ -221,7 +224,7 @@ the&#8230;&#8203;</p>
 <div class="paragraph">
 <p>On the other hand, the usual way to store and retrieve data in a relational database with
 <a href="https://spring.io/projects/spring-boot">Spring Boot</a> is to use <a href="https://spring.io/guides/gs/accessing-data-jpa/">Spring
-Data JPA</a>. <strong>In Spring Boot 2, Hikari is the default DataSource implementation</strong>, which makes it typical setup for
+Data JPA</a>. In Spring Boot 2, Hikari is the default DataSource implementation, which makes it typical setup for
 using relational databases.</p>
 </div>
 <div class="sect2">
