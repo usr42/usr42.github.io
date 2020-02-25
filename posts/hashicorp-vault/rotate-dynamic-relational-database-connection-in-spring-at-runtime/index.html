@@ -55,7 +55,7 @@ Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring · Secre
     <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-16.png" sizes="16x16">
 
-    <meta name="generator" content="Hugo 0.65.1" />
+    <meta name="generator" content="Hugo 0.65.3" />
   </head>
 
   
@@ -163,7 +163,7 @@ when these credentials expire. For more context and some general solutions pleas
 <a href="../spring-boot-max_ttl/">first post</a>.</p>
 </div>
 <div class="paragraph">
-<p>This time I would like to show you how to renew the database credential at runtime. So, this time you neither need to
+<p>This time I would like to show you how to renew the database credentials at runtime. So, this time you neither need to
 <a href="../spring-boot-max_ttl/#_use_a_long_enough_max_ttl_for_the_dynamic_database_credential">
 regularly restart or redeploy your application</a> nor to
 <a href="../spring-boot-max_ttl/#_when_the_vault_system_maximum_ttl_is_not_enough">
@@ -390,7 +390,7 @@ react on this kind of event.</p>
     <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Replace RENEW for expired credential with ROTATE"</span> <span style="color: #93a1a1">}</span>
     <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">requestRotatingSecret</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
 <span style="color: #93a1a1">}</span> <span style="color: #6c71c4">else</span> <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span> <span style="color: #6c71c4">is</span> <span style="color: #b58900">SecretLeaseCreatedEvent</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">ROTATE</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="2"></i><b>(2)</b>
-    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">credential</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span> <i class="conum" data-value="3"></i><b>(3)</b>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">credentials</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span> <i class="conum" data-value="3"></i><b>(3)</b>
     <span style="color: #657b83">// TODO Update database connection</span>
 <span style="color: #93a1a1">}</span></code></pre>
 </div>
@@ -413,10 +413,12 @@ react on this kind of event.</p>
 </div>
 <div class="paragraph">
 <p>The <a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/event/SecretLeaseCreatedEvent.html"><code>SecretLeaseCreatedEvent</code></a>
-contains the new credentials requested from Hashicorp Vault. The <code>event.credential</code> property (see
-<a href="https://kotlinlang.org/docs/reference/properties.html">Kotlin properties</a>) is an <a href="https://kotlinlang.org/docs/reference/extensions.html#extension-properties">extension property</a>
-(see code below).</p>
+contains the new credentials requested from Hashicorp Vault. The <code>event.credentials</code>
+<a href="https://kotlinlang.org/docs/reference/properties.html">property</a> is an
+<a href="https://kotlinlang.org/docs/reference/extensions.html#extension-properties">extension property</a> (see code below).</p>
 </div>
+<div class="sect2">
+<h3 id="_details_of_extracting_the_secrets_safely">Details of extracting the secrets safely</h3>
 <div class="paragraph">
 <p>The <code>SecretLeaseCreatedEvent</code> contains a <code>Map&lt;String, Object&gt;</code> with the secrets, so there is no typesafe option to get
 the database credentials. If for some reason the event does not contain the credentials we are again in the situation,
@@ -435,23 +437,50 @@ dependency to this class:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Now we can extract the credentials from the event and handle the error case:</p>
+<p>Now we can extract the credentials from the event. The extension property <code>event.credentials</code> returns <code>null</code> if the
+credentials cannot be received. With the <code>ConfigurableApplicationContext</code> we can handle this error case:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span>
-    <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">=</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">(</span><span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"username"</span><span style="color: #93a1a1">),</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"password"</span><span style="color: #93a1a1">))</span> <i class="conum" data-value="1"></i><b>(1)</b>
-
-<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #b58900">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">get</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">):</span> <span style="color: #b58900">String</span> <span style="color: #93a1a1">{</span>
-    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">value</span> <span style="color: #93a1a1">=</span> <span style="color: #93a1a1;background-color: #002b36">secrets</span><span style="color: #93a1a1">[</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">]</span> <span style="color: #6c71c4">as</span><span style="color: #93a1a1">?</span> <span style="color: #b58900">String</span> <i class="conum" data-value="2"></i><b>(2)</b>
-    <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">value</span> <span style="color: #93a1a1">==</span> <span style="color: #6c71c4">null</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
-        <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span>
-            <span style="color: #859900">"Cannot update DB credentials (no $param available). Shutting down."</span>
-        <span style="color: #93a1a1">}</span>
-        <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">close</span><span style="color: #93a1a1">()</span>
-        <span style="color: #6c71c4">throw</span> <span style="color: #b58900">IllegalStateException</span><span style="color: #93a1a1">(</span><span style="color: #859900">"Cannot get $param from secrets"</span><span style="color: #93a1a1">)</span>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credentials</span> <span style="color: #93a1a1">==</span> <span style="color: #6c71c4">null</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Cannot get updated DB credentials. Shutting down."</span> <span style="color: #93a1a1">}</span>
+    <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">close</span><span style="color: #93a1a1">()</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #6c71c4">return</span><span style="color: #002b36;background-color: #dc322f">@</span><span style="color: #93a1a1;background-color: #002b36">addLeaseListener</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span style="color: #93a1a1">}</span>
+<span style="color: #93a1a1;background-color: #002b36">refreshDatabaseConnection</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credentials</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>If we cannot get the renewed credentials shutdown the application</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>because of the return from the lambda, <code>credentials</code> is smart casted to a non-nullable value after the <code>if</code> block.
+Kotlin is awesome!</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>here the <code>credentials</code> cannot be <code>null</code> and can be used to <a href="#_refresh_the_database_connection">refresh the database connection</a></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now let&#8217;s see how the credentials are retrieved from the event within the extension property:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">credentials</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">?</span>
+    <span style="color: #6c71c4">get</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">{</span>
+        <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">username</span> <span style="color: #93a1a1">=</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"username"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">?:</span> <span style="color: #6c71c4">return</span> <span style="color: #6c71c4">null</span> <i class="conum" data-value="1"></i><b>(1)</b>
+        <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">password</span> <span style="color: #93a1a1">=</span> <span style="color: #6c71c4">get</span><span style="color: #93a1a1">(</span><span style="color: #859900">"password"</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">?:</span> <span style="color: #6c71c4">return</span> <span style="color: #6c71c4">null</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+        <span style="color: #6c71c4">return</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">,</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">)</span>
     <span style="color: #93a1a1">}</span>
-    <span style="color: #6c71c4">return</span> <span style="color: #93a1a1;background-color: #002b36">value</span> <i class="conum" data-value="4"></i><b>(4)</b>
+
+<span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #b58900">SecretLeaseCreatedEvent</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">get</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">):</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">?</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #6c71c4">return</span> <span style="color: #93a1a1;background-color: #002b36">secrets</span><span style="color: #93a1a1">[</span><span style="color: #93a1a1;background-color: #002b36">param</span><span style="color: #93a1a1">]</span> <span style="color: #6c71c4">as</span><span style="color: #93a1a1">?</span> <span style="color: #b58900">String</span> <i class="conum" data-value="2"></i><b>(2)</b>
 <span style="color: #93a1a1">}</span>
 
 <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">data class</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">(</span><span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">username</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">,</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">password</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">)</span></code></pre>
@@ -461,24 +490,17 @@ dependency to this class:</p>
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>username and password are extracted using the extension method <code>get()</code> and fill them into the <code>Credential</code> data
-class</td>
+<td>username and password are extracted using the extension method <code>get()</code>. If one of the <code>get()</code> calls return <code>null</code>
+then <code>null</code> is returned instead of a <code>Credential</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>with the <a href="https://kotlinlang.org/docs/reference/typecasts.html#safe-nullable-cast-operator">safe cast operator <code>as?</code></a>
-the secret is read out of the map</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>if the secret is not existing or not a string the value is <code>null</code>. In that case an error is logged, the application
-is shut down and an Exception is thrown</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Because of the thrown Exception the value is smart casted to non-nullable String. Kotlin is awesome!</td>
+<td>the secret is read out of the map and with
+<a href="https://kotlinlang.org/docs/reference/typecasts.html#safe-nullable-cast-operator"><code>as?</code> safe casted</a> to a
+<code>String</code>. If the entry does not exist in the map or is not a <code>String</code> then <code>null</code> is returned</td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 </div>
@@ -496,8 +518,10 @@ is shut down and an Exception is thrown</td>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">updateDbProperties</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
-<span style="color: #93a1a1;background-color: #002b36">updateDataSource</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">refreshDatabaseConnection</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">Credential</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span>
+    <span style="color: #93a1a1;background-color: #002b36">updateDbProperties</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #93a1a1;background-color: #002b36">updateDataSource</span><span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">credential</span><span style="color: #93a1a1">)</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span style="color: #93a1a1">}</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -597,7 +621,7 @@ Soft Evict Hikari Data Source Connections</code></pre>
 <p>The complete repository can be found <a href="https://github.com/usr42/spring-vault-database-rotate">on GitHub</a>.</p>
 </div>
 <div class="paragraph">
-<p>This handling of expiring Hashicorp Vault database secrets in a Spring application is production-ready.</p>
+<p>Finally the handling of expiring Hashicorp Vault database secrets in a Spring application is production-ready.</p>
 </div>
 </div>
 </div>
