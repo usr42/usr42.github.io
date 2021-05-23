@@ -4,6 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
 
     <meta name="author" content="Balthasar Biedermann">
     <meta name="description" content="Intersection of IT-Security, Software-Engineering and DevOps">
@@ -17,12 +21,9 @@
 <meta property="og:description" content="Intersection of IT-Security, Software-Engineering and DevOps" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://secrets-as-a-service.com/posts/" />
-<meta property="og:updated_time" content="2020-02-18T10:59:36+01:00" />
 
 
-    
-      <base href="https://secrets-as-a-service.com/posts/">
-    
+
     <title>
   Secrets as a Service · Secrets as a Service
 </title>
@@ -31,11 +32,12 @@
       <link rel="canonical" href="https://secrets-as-a-service.com/posts/">
     
 
-    <style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style>
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
     
       
       
-      <link rel="stylesheet" href="/css/coder.min.94221195bea5f37af71181ecb2fc2c26510c4f0083fc0a61fb4717ee19f33f94.css" integrity="sha256-lCIRlb6l83r3EYHssvwsJlEMTwCD/Aph&#43;0cX7hnzP5Q=" crossorigin="anonymous" media="screen" />
+      <link rel="stylesheet" href="/css/coder.min.19b9ec7ee66ebb1b12dd487b503d264ac362e8b120fd2dce845814999cb0b533.css" integrity="sha256-GbnsfuZuuxsS3Uh7UD0mSsNi6LEg/S3OhFgUmZywtTM=" crossorigin="anonymous" media="screen" />
     
 
     
@@ -46,16 +48,30 @@
 
     
 
-    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/images/icons8-tresor-sicher-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/icons8-tresor-sicher-16.png" sizes="16x16">
 
-    <link rel="alternate" type="application/rss+xml" href="https://secrets-as-a-service.com/posts/index.xml" title="Secrets as a Service" />
-    <meta name="generator" content="Hugo 0.67.1" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    <link rel="alternate" type="application/rss+xml" href="/posts/index.xml" title="Secrets as a Service" />
+    
+
+    <meta name="generator" content="Hugo 0.83.1" />
   </head>
 
   
   
-  <body class="colorscheme-light">
+  <body class="preload-transitions colorscheme-light"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
 
     <main class="wrapper">
       <nav class="navigation">
@@ -64,18 +80,20 @@
       Secrets as a Service
     </a>
     
-    <input type="checkbox" id="menu-toggle" />
-    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
-    <ul class="navigation-list">
-      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
         
-          <li class="navigation-item">
-            <a class="navigation-link" href="https://secrets-as-a-service.com/about/">About</a>
-          </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
         
-      
-      
-    </ul>
+        
+      </ul>
     
   </section>
 </nav>
@@ -84,8 +102,12 @@
       <div class="content">
         
   <section class="container list">
-    <h1 class="title">Secrets as a Service</h1>
-
+    <h1 class="title">
+      <a class="title-link" href="https://secrets-as-a-service.com/posts/">
+        Secrets as a Service
+      </a>
+    </h1>
+    
     <ul></ul>
 
     
@@ -99,26 +121,28 @@
 
       </div>
 
-      <footer class="footer">
+      
+<footer class="footer">
   <section class="container">
     
-      <a href="/impressum">Impressum</a>
+    <a href="/impressum">Impressum</a>
     
     
     
     
     <a href="https://github.com/usr42" aria-label="Github" >
-      <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+      <i class="fa fa-github fa-2x" aria-hidden="true"></i>
     </a>
     
     
     
     <a href="https://www.linkedin.com/in/balthasar-biedermann-742170107/" aria-label="LinkedIn" >
-      <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+      <i class="fa fa-linkedin fa-2x" aria-hidden="true"></i>
     </a>
     
     
     
+
     
     
     
@@ -128,28 +152,39 @@
     </main>
 
     
-
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
 
     
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/famin.css" />
+
     
-    <script type="text/javascript">
-      var _paq = window._paq || [];
-       
-      _paq.push(["setDoNotTrack", true]);
-      _paq.push(["disableCookies"]);
-      _paq.push(['trackPageView']);
-      _paq.push(['enableLinkTracking']);
-      (function() {
-        var u="https://matomo.secrets-as-a-service.com/";
-        _paq.push(['setTrackerUrl', u+'matomo.php']);
-        _paq.push(['setSiteId', '1']);
-        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-      })();
-    </script>
-    <noscript><p><img src="https://matomo.secrets-as-a-service.com/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+
+    
+
+    
+
+    
+
+    
+
+    <script type="application/javascript">
+  var _paq = window._paq = window._paq || [];
+   
+  _paq.push(['setDoNotTrack', true]);
+  _paq.push(['disableCookies']);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://matomo.secrets-as-a-service.com/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+
+
     
   </body>
 

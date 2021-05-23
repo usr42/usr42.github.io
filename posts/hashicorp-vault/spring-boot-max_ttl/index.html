@@ -4,10 +4,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
 
     <meta name="author" content="Balthasar Biedermann">
     <meta name="description" content="How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl">
-    <meta name="keywords" content="blog,developer,personal,security,devops,software,hashicorp,vault,spring">
+    <meta name="keywords" content="Dynamic,Secrets,Secrets,as,a,service,Secrets,management,Hashicorp,Vault,Spring,Boot,Kotlin,Relational,Database,PostgreSQL,Postgres,MySQL,database,secrets,engine,microservice,kubernetes,k8s,example,getting,started,how,to">
 
     <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://secrets-as-a-service.com/images/locked-door.jpg"/>
@@ -18,28 +22,26 @@
     <meta property="og:title" content="Hashicorp Vault max_ttl Killed My Spring App" />
 <meta property="og:description" content="How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/" />
-<meta property="og:image" content="https://secrets-as-a-service.com/images/locked-door.jpg" />
-<meta property="article:published_time" content="2020-01-28T20:51:34+01:00" />
-<meta property="article:modified_time" content="2020-01-28T20:51:34+01:00" />
+<meta property="og:url" content="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/" /><meta property="og:image" content="https://secrets-as-a-service.com/images/locked-door.jpg" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-01-28T20:51:34&#43;01:00" />
+<meta property="article:modified_time" content="2020-01-28T20:51:34&#43;01:00" />
 
 
-    
-      <base href="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/">
-    
+
     <title>
-Hashicorp Vault max_ttl Killed My Spring App · Secrets as a Service
+  Hashicorp Vault max_ttl Killed My Spring App · Secrets as a Service
 </title>
 
     
       <link rel="canonical" href="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/">
     
 
-    <style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style>
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
     
       
       
-      <link rel="stylesheet" href="/css/coder.min.94221195bea5f37af71181ecb2fc2c26510c4f0083fc0a61fb4717ee19f33f94.css" integrity="sha256-lCIRlb6l83r3EYHssvwsJlEMTwCD/Aph&#43;0cX7hnzP5Q=" crossorigin="anonymous" media="screen" />
+      <link rel="stylesheet" href="/css/coder.min.19b9ec7ee66ebb1b12dd487b503d264ac362e8b120fd2dce845814999cb0b533.css" integrity="sha256-GbnsfuZuuxsS3Uh7UD0mSsNi6LEg/S3OhFgUmZywtTM=" crossorigin="anonymous" media="screen" />
     
 
     
@@ -50,15 +52,29 @@ Hashicorp Vault max_ttl Killed My Spring App · Secrets as a Service
 
     
 
-    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="https://secrets-as-a-service.com/images/icons8-tresor-sicher-16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/images/icons8-tresor-sicher-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/icons8-tresor-sicher-16.png" sizes="16x16">
 
-    <meta name="generator" content="Hugo 0.67.1" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.83.1" />
   </head>
 
   
   
-  <body class="colorscheme-light">
+  <body class="preload-transitions colorscheme-light"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
 
     <main class="wrapper">
       <nav class="navigation">
@@ -67,18 +83,20 @@ Hashicorp Vault max_ttl Killed My Spring App · Secrets as a Service
       Secrets as a Service
     </a>
     
-    <input type="checkbox" id="menu-toggle" />
-    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
-    <ul class="navigation-list">
-      
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
         
-          <li class="navigation-item">
-            <a class="navigation-link" href="https://secrets-as-a-service.com/about/">About</a>
-          </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
         
-      
-      
-    </ul>
+        
+      </ul>
     
   </section>
 </nav>
@@ -86,35 +104,41 @@ Hashicorp Vault max_ttl Killed My Spring App · Secrets as a Service
 
       <div class="content">
         
-<section class="container post">
-  <article>
-    <header>
-      <div class="post-title">
-        <h1 class="title">Hashicorp Vault max_ttl Killed My Spring App</h1>
-        <h2 class="subtitle">How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl</h2>
-      </div>
-      <div class="post-meta">
-        <div class="date">
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/">
+              Hashicorp Vault max_ttl Killed My Spring App
+            </a>
+          </h1>
+          <h2 class="subtitle">How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl</h2>
+        </div>
+        <div class="post-meta">
+          <div class="date">
             <span class="posted-on">
-              <i class="fas fa-calendar"></i>
+              <i class="fa fa-calendar" aria-hidden="true"></i>
               <time datetime='2020-01-28T20:51:34&#43;01:00'>
                 Jan 28, 2020
               </time>
             </span>
-          <span class="reading-time">
-              <i class="fas fa-clock"></i>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
               8-minute read
             </span>
+          </div>
+          
+          
+          
         </div>
-        
-        
-      </div>
-    </header>
+      </header>
 
-    <div>
-      <div class="imageblock">
+      <div>
+        
+        <div class="imageblock">
 <div class="content">
-<img src="/images/locked-door.jpg" alt="Locked Door">
+<img src="/images/locked-door.jpg" alt="Locked Door"/>
 </div>
 <div class="title">Image by <a href="https://pixabay.com/users/Broesis-5213623/">Maike und Björn Bröskamp</a> from <a href="https://pixabay.com/">pixabay</a></div>
 </div>
@@ -157,7 +181,7 @@ secret expires</a></p>
 prefer Kotlin). The same approach of the code snippets would also working with Java or other JVM languages.</p>
 </div>
 <div class="paragraph">
-<p>Obviously, most people still use Java. That&#8217;s why all code examples will also be available in Java in a future update
+<p>Obviously, most people still use Java. That’s why all code examples will also be available in Java in a future update
 of this post.</p>
 </div>
 </div>
@@ -167,7 +191,7 @@ of this post.</p>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="/images/wispering-mongoose.jpg" alt="Mongooses cannot keep secrets">
+<img src="/images/wispering-mongoose.jpg" alt="Mongooses cannot keep secrets"/>
 </div>
 <div class="title">Mongooses cannot keep secrets - Image by <a href="https://pixabay.com/users/veverkolog-11252911/">Dušan Smetana</a> from <a href="https://pixabay.com/">pixabay</a></div>
 </div>
@@ -177,7 +201,7 @@ handle the secrets in your code in a secure manner. Fortunately, these days ther
 <a href="https://www.thoughtworks.com/radar/techniques/secrets-as-a-service">secrets as a service</a> tools available. The most
 famous and mature one is <a href="https://www.vaultproject.io/">Hashicorp Vault</a>. As a Kotlin or Java developer building a Spring
 Boot application you are in a lucky situation, because it is really easy to get your Hashicorp Vault integration
-up and running by using <a href="https://spring.io/projects/spring-vault">Spring Vault</a>. Vault&#8217;s concept of
+up and running by using <a href="https://spring.io/projects/spring-vault">Spring Vault</a>. Vault’s concept of
 <a href="https://www.hashicorp.com/blog/why-we-need-dynamic-secrets/">dynamic secrets</a> is probably THE killer feature and allows
 you for example to easily get unique, secure and short-lived database credentials which follow the
 <a href="https://en.wikipedia.org/wiki/Principle_of_least_privilege">principle of least privilege</a>.</p>
@@ -205,7 +229,7 @@ task to tackle. Here is a (not complete) list contains of things to consider:</p
 bootstrapping problem)</p>
 </li>
 <li>
-<p>ensure that Vault&#8217;s availability is good enough to not break your system: probably you want to have a
+<p>ensure that Vault’s availability is good enough to not break your system: probably you want to have a
 <a href="https://www.vaultproject.io/docs/concepts/ha/">high availability (HA) setup</a></p>
 </li>
 <li>
@@ -232,8 +256,8 @@ application-level challenge with using Vault together with Spring: What happens 
 <h2 id="_spring_boot_and_the_maximum_ttl_of_a_lease_in_hashicorp_vault">Spring Boot and the maximum TTL of a lease in Hashicorp Vault</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Most people don&#8217;t think about the maximum time-to-life of this secret or expect that the database credentials are
-automatically rotated by Spring when needed. Let&#8217;s check the
+<p>Most people don’t think about the maximum time-to-life of this secret or expect that the database credentials are
+automatically rotated by Spring when needed. Let’s check the
 <a href="https://cloud.spring.io/spring-cloud-vault/reference/html/#vault.config.backends.database">Spring Cloud Vault
 documentation</a>:</p>
 </div>
@@ -256,7 +280,7 @@ prerequisites to apply. The 4th solution is only working for a more specific but
 provides a smoother experience. I will describe its details in the next blog post.</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s check our options.</p>
+<p>Let’s check our options.</p>
 </div>
 </div>
 </div>
@@ -269,7 +293,7 @@ time. This duration is configurable. So, if you regularly deploy or restart your
 enough <code>max_ttl</code>.</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s consider you have a two-week sprint and it is guaranteed that after each sprint your application is redeployed.
+<p>Let’s consider you have a two-week sprint and it is guaranteed that after each sprint your application is redeployed.
 Then you could just configure the <code>max_ttl</code> to be longer than 2 weeks, for instance 16 days. A good example how to
 setup Vault to generate dynamic credentials for PostgreSQL can be found on the
 <a href="https://learn.hashicorp.com/vault/secrets-management/sm-dynamic-secrets">Hashicorp Learn site about Dynamic Secrets</a>.
@@ -289,49 +313,49 @@ You just have to adapt the <code>max_ttl</code> value to 16 days (384 hours)
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
-<p>The system max TTL, which is 32 days but can be changed in Vault&#8217;s configuration file.</p>
+<p>The system max TTL, which is 32 days but can be changed in Vault’s configuration file.</p>
 </div>
 </blockquote>
 <div class="attribution">
-&#8212; <a href="https://www.vaultproject.io/docs/concepts/tokens/#the-general-case">Vault Concepts: Tokens</a>
+— <a href="https://www.vaultproject.io/docs/concepts/tokens/#the-general-case">Vault Concepts: Tokens</a>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_when_the_vault_system_maximum_ttl_is_not_enough">When the Vault system maximum TTL is not enough&#8230;&#8203;</h2>
+<h2 id="_when_the_vault_system_maximum_ttl_is_not_enough">When the Vault system maximum TTL is not enough…​</h2>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="/images/clock-1274699_1920.jpg" alt="Time is running out">
+<img src="/images/clock-1274699_1920.jpg" alt="Time is running out"/>
 </div>
 <div class="title">Time is running out - Image by <a href="https://pixabay.com/users/Monoar-2240009/">Monoar Rahman Rony</a> from <a href="https://pixabay.com/">pixabay</a></div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;it is also possible to increase it via the Vault configuration. The
+<p>…​it is also possible to increase it via the Vault configuration. The
 <a href="https://www.vaultproject.io/docs/configuration/#inlinecode-max_lease_ttl-8">Vault Configuration documentation</a> mentions
-that the <code>max_lease_ttl</code> parameter, which defaults to <code>"768h"</code> can be used for that.</p>
+that the <code>max_lease_ttl</code> parameter, which defaults to <code>&#34;768h&#34;</code> can be used for that.</p>
 </div>
 <div class="paragraph">
 <p>An example vault config could look like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="hcl"><span style="color: #93a1a1;background-color: #002b36">max_lease_ttl</span> <span style="color: #002b36;background-color: #dc322f">=</span> <span style="color: #859900">"3000h"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="hcl"><span style="color: #93a1a1;background-color: #002b36">max_lease_ttl</span> <span style="color: #002b36;background-color: #dc322f">=</span> <span style="color: #859900">&#34;3000h&#34;</span> <i class="conum" data-value="1"></i><b>(1)</b>
 
-<span style="color: #93a1a1;background-color: #002b36">storage</span> <span style="color: #859900">"file"</span> <span style="color: #93a1a1">{</span>
-  <span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">"/var/vault/vault-storage"</span>
+<span style="color: #93a1a1;background-color: #002b36">storage</span> <span style="color: #859900">&#34;file&#34;</span> <span style="color: #93a1a1">{</span>
+  <span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">&#34;/var/vault/vault-storage&#34;</span>
 <span style="color: #93a1a1">}</span>
 
-<span style="color: #93a1a1;background-color: #002b36">listener</span> <span style="color: #859900">"tcp"</span> <span style="color: #93a1a1">{</span>
-  <span style="color: #93a1a1;background-color: #002b36">address</span>     <span style="color: #93a1a1">=</span> <span style="color: #859900">"127.0.0.1:8200"</span>
+<span style="color: #93a1a1;background-color: #002b36">listener</span> <span style="color: #859900">&#34;tcp&#34;</span> <span style="color: #93a1a1">{</span>
+  <span style="color: #93a1a1;background-color: #002b36">address</span>     <span style="color: #93a1a1">=</span> <span style="color: #859900">&#34;127.0.0.1:8200&#34;</span>
   <span style="color: #93a1a1;background-color: #002b36">tls_disable</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">1</span> <i class="conum" data-value="2"></i><b>(2)</b>
 <span style="color: #93a1a1">}</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
-<tr>
+<tbody><tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
 <td>The system max TTL is set to 3000h here, the rest of the config is just for demonstration purpose</td>
 </tr>
@@ -339,7 +363,7 @@ that the <code>max_lease_ttl</code> parameter, which defaults to <code>"768h"</c
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>You should never do that in production</td>
 </tr>
-</table>
+</tbody></table>
 </div>
 <div class="paragraph">
 <p>Before you now just change the <code>max_lease_ttl</code> for all your Vault instances to a really big value, you should wait a
@@ -355,7 +379,7 @@ reason why I would not recommend changing this value if you can use one of the o
 <h2 id="_restarting_the_application_when_credentials_expire">Restarting the application when credentials expire</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If you cannot guaranty that your Spring application is redeployed or restarted often enough or you don&#8217;t want to live
+<p>If you cannot guaranty that your Spring application is redeployed or restarted often enough or you don’t want to live
 with the risk of long living secrets the first two options are not for you. Instead you should change the setup, so
 that the database secrets of the application can be rotated.</p>
 </div>
@@ -371,7 +395,7 @@ adding an additional
 <code><a href="https://docs.spring.io/spring-vault/docs/current/api/org/springframework/vault/core/lease/SecretLeaseContainer.html">SecretLeaseContainer</a></code>.</p>
 </div>
 <div class="paragraph">
-<p>I expect that you&#8217;ve already setup Spring and Vault to create dynamic database secrets (how to do that, see for example
+<p>I expect that you’ve already setup Spring and Vault to create dynamic database secrets (how to do that, see for example
 <a href="https://spring.io/blog/2016/08/15/managing-your-database-secrets-with-vault">Managing your Database Secrets with Vault @
 Spring blog</a> or <a href="https://www.baeldung.com/spring-cloud-vault">An Intro to Spring Cloud Vault @ Baeldung</a>). Then you can
 autowire the <code>SecretLeaseContainer</code>, the database role which is configured as the property
@@ -383,7 +407,7 @@ which eventually shuts down the Spring application:</p>
 <pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@Configuration</span>
 <span style="color: #cb4b16">class</span> <span style="color: #b58900">VaultConfig</span><span style="color: #93a1a1">(</span>
         <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">SecretLeaseContainer</span><span style="color: #93a1a1">,</span>
-        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">"\${spring.cloud.vault.database.role}"</span><span style="color: #93a1a1">)</span>
+        <span style="color: #93a1a1;background-color: #002b36">@Value</span><span style="color: #93a1a1">(</span><span style="color: #859900">&#34;\${spring.cloud.vault.database.role}&#34;</span><span style="color: #93a1a1">)</span>
         <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">databaseRole</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">String</span><span style="color: #93a1a1">,</span>
         <span style="color: #6c71c4">private</span> <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">:</span> <span style="color: #b58900">ConfigurableApplicationContext</span>
 <span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span></code></pre>
@@ -396,12 +420,12 @@ which eventually shuts down the Spring application:</p>
 <div class="content">
 <pre class="rouge highlight" style="color: #93a1a1;background-color: #002b36"><code data-lang="kotlin"><span style="color: #93a1a1;background-color: #002b36">@PostConstruct</span>
 <span style="color: #6c71c4">private</span> <span style="color: #6c71c4">fun</span> <span style="color: #93a1a1;background-color: #002b36">configureShutdownWhenLeaseExpires</span><span style="color: #93a1a1">()</span> <span style="color: #93a1a1">{</span>
-    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">"database/creds/$databaseRole"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span style="color: #cb4b16">val</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span> <span style="color: #93a1a1">=</span> <span style="color: #859900">&#34;database/creds/$databaseRole&#34;</span> <i class="conum" data-value="1"></i><b>(1)</b>
     <span style="color: #93a1a1;background-color: #002b36">leaseContainer</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">addLeaseListener</span> <span style="color: #93a1a1">{</span> <span style="color: #93a1a1;background-color: #002b36">event</span> <span style="color: #93a1a1">-&gt;</span> <i class="conum" data-value="2"></i><b>(2)</b>
         <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">path</span> <span style="color: #93a1a1">==</span> <span style="color: #93a1a1;background-color: #002b36">vaultCredsPath</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
-            <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Lease change for DB: ($event) : (${event.lease})"</span> <span style="color: #93a1a1">}</span>
+            <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">info</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">&#34;Lease change for DB: ($event) : (${event.lease})&#34;</span> <span style="color: #93a1a1">}</span>
             <span style="color: #6c71c4">if</span> <span style="color: #93a1a1">(</span><span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">isLeaseExpired</span> <span style="color: #93a1a1">&amp;&amp;</span> <span style="color: #93a1a1;background-color: #002b36">event</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">mode</span> <span style="color: #93a1a1">==</span> <span style="color: #b58900">RENEW</span><span style="color: #93a1a1">)</span> <span style="color: #93a1a1">{</span> <i class="conum" data-value="3"></i><b>(3)</b>
-                <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">"Database lease expired. Shutting down."</span> <span style="color: #93a1a1">}</span>
+                <span style="color: #93a1a1;background-color: #002b36">log</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">error</span> <span style="color: #93a1a1">{</span> <span style="color: #859900">&#34;Database lease expired. Shutting down.&#34;</span> <span style="color: #93a1a1">}</span>
                 <span style="color: #93a1a1;background-color: #002b36">applicationContext</span><span style="color: #93a1a1">.</span><span style="color: #93a1a1;background-color: #002b36">close</span><span style="color: #93a1a1">()</span> <i class="conum" data-value="4"></i><b>(4)</b>
             <span style="color: #93a1a1">}</span>
         <span style="color: #93a1a1">}</span>
@@ -411,14 +435,14 @@ which eventually shuts down the Spring application:</p>
 </div>
 <div class="colist arabic">
 <table>
-<tr>
+<tbody><tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
 <td>build the creds path by using the autowired <code>databaseRole</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td><code>LeaseListenener</code> is a SAM interface, so just provide a lambda (see
-<a href="https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions">Kotlin&#8217;s SAM Conversion</a>)</td>
+<a href="https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions">Kotlin’s SAM Conversion</a>)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
@@ -428,7 +452,7 @@ which eventually shuts down the Spring application:</p>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>shutdown the Spring application</td>
 </tr>
-</table>
+</tbody></table>
 </div>
 <div class="paragraph">
 <p>And here are the extension methods used above:</p>
@@ -441,7 +465,7 @@ which eventually shuts down the Spring application:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If you don&#8217;t use a tool like Kubernetes or systemd you should
+<p>If you don’t use a tool like Kubernetes or systemd you should
 <a href="https://www.baeldung.com/java-restart-spring-boot-app">restart the application</a>, instead of shutting it down.</p>
 </div>
 <div class="paragraph">
@@ -455,14 +479,14 @@ which eventually shuts down the Spring application:</p>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="/images/climbing-2264698_1920.jpg" alt="Cliffhanger &#8230;&#8203; to be continued">
+<img src="/images/climbing-2264698_1920.jpg" alt="Cliffhanger …​ to be continued"/>
 </div>
-<div class="title">Cliffhanger &#8230;&#8203; to be continued - Image by <a href="https://pixabay.com/users/wallace769-5217358/">Shri ram</a> from <a href="https://pixabay.com/">pixabay</a></div>
+<div class="title">Cliffhanger …​ to be continued - Image by <a href="https://pixabay.com/users/wallace769-5217358/">Shri ram</a> from <a href="https://pixabay.com/">pixabay</a></div>
 </div>
 <div class="paragraph">
 <p>There is also the possibility to implement the database credential renewal in the application itself. Spring itself
 does not provide a generic way to do this.
-<a href="../rotate-dynamic-relational-database-connection-in-spring-at-runtime/">In the next blog post I&#8217;ll show a way how
+<a href="../rotate-dynamic-relational-database-connection-in-spring-at-runtime/">In the next blog post I’ll show a way how
 to do this manually if you use Spring with HikariCP as JDBC connection pool, which works for example with PostgreSQL or
 MySQL databases.</a></p>
 </div>
@@ -472,49 +496,53 @@ MySQL databases.</a></p>
 </div>
 </div>
 
-    </div>
-
-    <footer>
-      
+      </div>
 
 
-      
-      
-      <script src="https://utteranc.es/client.js"
-  repo= "usr42/usr42.github.io"
-  issue-term="pathname"
-  theme="github-light"
-  crossorigin="anonymous"
-  async>
-</script>
-    </footer>
-  </article>
+      <footer>
+        
 
-  
-</section>
+
+        
+        
+        <script src="https://utteranc.es/client.js"
+    repo= "usr42/usr42.github.io"
+    issue-term="pathname"
+    
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+  </script>
+      </footer>
+    </article>
+
+    
+  </section>
 
       </div>
 
-      <footer class="footer">
+      
+<footer class="footer">
   <section class="container">
     
-      <a href="/impressum">Impressum</a>
+    <a href="/impressum">Impressum</a>
     
     
     
     
     <a href="https://github.com/usr42" aria-label="Github" >
-      <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+      <i class="fa fa-github fa-2x" aria-hidden="true"></i>
     </a>
     
     
     
     <a href="https://www.linkedin.com/in/balthasar-biedermann-742170107/" aria-label="LinkedIn" >
-      <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+      <i class="fa fa-linkedin fa-2x" aria-hidden="true"></i>
     </a>
     
     
     
+
     
     
     
@@ -524,28 +552,39 @@ MySQL databases.</a></p>
     </main>
 
     
-
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
 
     
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/famin.css" />
+
     
-    <script type="text/javascript">
-      var _paq = window._paq || [];
-       
-      _paq.push(["setDoNotTrack", true]);
-      _paq.push(["disableCookies"]);
-      _paq.push(['trackPageView']);
-      _paq.push(['enableLinkTracking']);
-      (function() {
-        var u="https://matomo.secrets-as-a-service.com/";
-        _paq.push(['setTrackerUrl', u+'matomo.php']);
-        _paq.push(['setSiteId', '1']);
-        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-      })();
-    </script>
-    <noscript><p><img src="https://matomo.secrets-as-a-service.com/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+
+    
+
+    
+
+    
+
+    
+
+    <script type="application/javascript">
+  var _paq = window._paq = window._paq || [];
+   
+  _paq.push(['setDoNotTrack', true]);
+  _paq.push(['disableCookies']);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://matomo.secrets-as-a-service.com/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+
+
     
   </body>
 
