@@ -14,7 +14,7 @@
         
         
         <item>
-            <title>Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring</title>
+            <title>Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring Boot</title>
             <link>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</link>
             <pubDate>Tue, 18 Feb 2020 10:59:36 +0100</pubDate>
             <author>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</author>
