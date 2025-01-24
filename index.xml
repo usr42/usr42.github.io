@@ -6,9 +6,9 @@
         <description>Recent content on Secrets as a Service</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <managingEditor>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</managingEditor>
-        <webMaster>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</webMaster>
-        <lastBuildDate>Tue, 18 Feb 2020 10:59:36 +0100</lastBuildDate>
+        <managingEditor>Balthasar Biedermann (Balthasar Biedermann)</managingEditor>
+        <webMaster>Balthasar Biedermann (Balthasar Biedermann)</webMaster>
+        <lastBuildDate>Thu, 01 Jul 2021 10:00:19 +0200</lastBuildDate>
         
         <atom:link href="https://secrets-as-a-service.com/index.xml" rel="self" type="application/rss+xml" />
         
@@ -17,7 +17,7 @@
             <title>Heavy Rotation of Relational Hashicorp Vault Database Secrets in Spring Boot</title>
             <link>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</link>
             <pubDate>Tue, 18 Feb 2020 10:59:36 +0100</pubDate>
-            <author>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</author>
+            <author>Balthasar Biedermann (Balthasar Biedermann)</author>
             <guid>https://secrets-as-a-service.com/posts/hashicorp-vault/rotate-dynamic-relational-database-connection-in-spring-at-runtime/</guid>
             <description>Rotate Expiring Spring Cloud Vault Database Credentials Without Downtime</description>
         </item>
@@ -26,9 +26,9 @@
             <title>Hashicorp Vault max_ttl Killed My Spring App</title>
             <link>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</link>
             <pubDate>Tue, 28 Jan 2020 20:51:34 +0100</pubDate>
-            <author>balthasar.biedermann@secrets-as-a-service.com (Balthasar Biedermann)</author>
+            <author>Balthasar Biedermann (Balthasar Biedermann)</author>
             <guid>https://secrets-as-a-service.com/posts/hashicorp-vault/spring-boot-max_ttl/</guid>
-            <description>How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault&#39;s max_ttl</description>
+            <description>How to Ensure That Expiring Spring Cloud Vault Dynamic Database Secrets Are Renewed, When Reaching Hashicorp Vault's max_ttl</description>
         </item>
         
     </channel>

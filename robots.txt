@@ -1,3 +1,2 @@
 User-Agent: *
 Disallow: /impressum/
-Sitemap: https://secrets-as-a-service.com/sitemap.xml
